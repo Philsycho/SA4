@@ -1,0 +1,6 @@
+DROP IF EXISTS sa4;
+
+CREATE IF NOT EXISTS sa4;
+
+USE sa4;
+
