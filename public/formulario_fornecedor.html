@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Fornecedor</title>
+</head>
+<body>
+    <h2>Cadastro de Fornecedor</h2>
+    <form action="processa_fornecedor.php" method="POST">
+        <label for="nome_fornecedor">Nome do Fornecedor:</label>
+        <input type="text" id="nome_fornecedor" name="nome_fornecedor" required>
+
+        <label for="cnpj">CNPJ:</label>
+        <input type="text" id="cnpj" name="cnpj_fornecedor" required>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+</body>
+</html>
