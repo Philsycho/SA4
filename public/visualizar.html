@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualização de Produto</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para buscar os detalhes do produto e preencher a página
+        function buscarDetalhesProduto() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idProduto = urlParams.get('id');
+
+            // Simulação de busca no banco de dados
+            if (idProduto === "1") {
+                document.getElementById('id_produto').innerText = "1";
+                document.getElementById('nome_produto').innerText = "Produto Exemplo";
+                document.getElementById('preco_produto').innerText = "100";
+                document.getElementById('fornecedor_produto').innerText = "1";
+            } else {
+                alert("Produto não encontrado");
+            }
+        }
+
+        // Carregar os detalhes do produto ao carregar a página
+        window.onload = buscarDetalhesProduto;
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Visualização de Produto</h2>
+        <div>
+            <p>ID: <span id="id_produto"></span></p>
+            <p>Nome: <span id="nome_produto"></span></p>
+            <p>Preço: <span id="preco_produto"></span></p>
+            <p>Fornecedor: <span id="fornecedor_produto"></span></p>
+            <button onclick="window.history.back()">Voltar</button>
+        </div>
+    </div>
+</body>
+</html>

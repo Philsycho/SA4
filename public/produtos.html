@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta e Exibição de Produtos</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para exibir lista de produtos
+        function exibirProdutos() {
+            const produtos = [
+                { id: 1, nome: "Produto Exemplo", preco: 100, fornecedor: 1 }
+                // Adicione outros produtos aqui
+            ];
+
+            const listaProdutos = document.getElementById('lista_produtos');
+            listaProdutos.innerHTML = ''; // Limpa a lista
+
+            produtos.forEach(produto => {
+                const produtoItem = document.createElement('div');
+                produtoItem.className = 'produto-item';
+                produtoItem.innerHTML = `
+                    <p>ID: ${produto.id}</p>
+                    <p>Nome: ${produto.nome}</p>
+                    <p>Preço: ${produto.preco}</p>
+                    <p>Fornecedor: ${produto.fornecedor}</p>
+                    <button onclick="visualizarProduto(${produto.id})">Visualizar</button>
+                    <button onclick="editarProduto(${produto.id})">Editar</button>
+                `;
+                listaProdutos.appendChild(produtoItem);
+            });
+        }
+
+        // Função para redirecionar para a página de visualização
+        function visualizarProduto(id) {
+            window.location.href = `visualizar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarProduto(id) {
+            window.location.href = `editar.html?id=${id}`;
+        }
+
+        // Carregar produtos ao carregar a página
+        window.onload = exibirProdutos;
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Consulta e Exibição de Produtos</h2>
+        <div id="lista_produtos" class="lista-produtos">
+            <!-- Lista de produtos será exibida aqui -->
+        </div>
+    </div>
+</body>
+</html>
