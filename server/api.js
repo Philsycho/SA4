@@ -1,10 +1,13 @@
  
 const express = require('express');
 const mysql = require('mysql2');
+const cors = require('cors');
 const app = express();
 const port = 3000;
+const bcrypt = require('bcrypt');
 
 app.use(express.json());
+app.use(cors());
 
 // Configuração do banco de dados
 const db = mysql.createConnection({
@@ -28,40 +31,31 @@ app.get('/', (req, res) => {
     res.send('API de Automação de Solicitação de Compras');
 });
 
-// CRUD Usuários
-app.get('/usuarios', (req, res) => {
-    db.query('SELECT * FROM usuario', (err, results) => {
+// Rota de Login
+app.post('/login', (req, res) => {
+    const { nome_usuario, senha_usuario } = req.body;
+    
+    db.query('SELECT * FROM usuario WHERE nome_usuario = ?', [nome_usuario], (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
-    });
-});
+        
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Usuário ou senha inválidos!' });
+        }
 
-app.post('/usuarios', (req, res) => {
-    const { nome_usuario, senha_usuario, email_usuario } = req.body;
-    db.query('INSERT INTO usuario (nome_usuario, senha_usuario, email_usuario) VALUES (?, ?, ?)',
-        [nome_usuario, senha_usuario, email_usuario],
-        (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: results.insertId, nome_usuario, email_usuario });
+        const user = results[0];
+
+        // Comparar a senha fornecida com a senha criptografada no banco de dados usando bcrypt
+        bcrypt.compare(senha_usuario, user.senha_usuario, (err, isMatch) => {
+            if (err) return res.status(500).json({ error: 'Erro ao verificar a senha' });
+            
+            if (isMatch) {
+                // Login bem-sucedido
+                res.json({ message: 'Login realizado com sucesso!', redirect: '/produtos.html' });
+            } else {
+                res.status(401).json({ message: 'Usuário ou senha inválidos!' });
+            }
         });
-});
-
-// CRUD Fornecedores
-app.get('/fornecedores', (req, res) => {
-    db.query('SELECT * FROM fornecedor', (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
     });
-});
-
-app.post('/fornecedores', (req, res) => {
-    const { nome_fornecedor, cnpj_fornecedor } = req.body;
-    db.query('INSERT INTO fornecedor (nome_fornecedor, cnpj_fornecedor) VALUES (?, ?)',
-        [nome_fornecedor, cnpj_fornecedor],
-        (err, results) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: results.insertId, nome_fornecedor, cnpj_fornecedor });
-        });
 });
 
 // Iniciar servidor
