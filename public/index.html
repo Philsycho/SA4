@@ -3,43 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tela de Login</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Login</title>
 </head>
 <body>
-    <div class="login-container">
+    <div class="container">
         <h2>Login</h2>
         <form id="loginForm">
-            <input type="text" id="usuario" placeholder="Usuário" required>
-            <input type="password" id="senha" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
+            <input type="text" id="nome_usuario" placeholder="Usuário" required>
+            <input type="password" id="senha_usuario" placeholder="Senha" required>
+            <button type="submit">Login</button>
         </form>
-        <p id="mensagem"></p>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            const usuario = document.getElementById('usuario').value;
-            const senha = document.getElementById('senha').value;
-
-            const response = await fetch('http://localhost:3000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome_usuario: usuario, senha_usuario: senha })
-            });
             
-            const data = await response.json();
-            const mensagem = document.getElementById('mensagem');
-            if (response.ok) {
-                mensagem.textContent = 'Login realizado com sucesso!';
-                mensagem.style.color = 'green';
-                // Redirecionar para a página de consulta de produtos
-                window.location.href = 'produtos.html';
-            } else {
-                mensagem.textContent = 'Usuário ou senha inválidos!';
-                mensagem.style.color = 'red';
-            }
+            const nome_usuario = document.getElementById("nome_usuario").value;
+            const senha_usuario = document.getElementById("senha_usuario").value;
+            
+            fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nome_usuario, senha_usuario })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message); // Exibe a mensagem do backend
+                    if (data.redirect) {
+                        window.location.href = data.redirect; // Redireciona para a página de produtos
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao tentar fazer login:', error);
+                alert("Erro ao tentar fazer login");
+            });
         });
     </script>
 </body>
