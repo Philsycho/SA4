@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edição de Pedido</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para buscar os detalhes do pedido e preencher o formulário
+        function buscarDetalhesPedido() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idPedido = urlParams.get('id');
+
+            // Simulação de busca no banco de dados
+            if (idPedido === "1") {
+                document.getElementById('id_pedido').value = "1";
+                document.getElementById('usuario_pedido').value = "Usuário Exemplo";
+                document.getElementById('produto_pedido').value = "Produto Exemplo";
+                document.getElementById('quantidade_pedido').value = "10";
+                document.getElementById('preco_pedido').value = "1000";
+            } else {
+                alert("Pedido não encontrado");
+            }
+        }
+
+        // Carregar os detalhes do pedido ao carregar a página
+        window.onload = buscarDetalhesPedido;
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Edição de Pedido</h2>
+        <form>
+            <input type="hidden" id="id_pedido">
+            <input type="text" id="usuario_pedido" placeholder="Usuário" required>
+            <input type="text" id="produto_pedido" placeholder="Produto" required>
+            <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
+            <input type="number" id="preco_pedido" placeholder="Preço" required>
+            <button type="submit">Atualizar</button>
+            <button type="button" onclick="window.history.back()">Cancelar</button>
+        </form>
+    </div>
+</body>
+</html>

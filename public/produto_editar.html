@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edição de Produto</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para buscar os detalhes do produto e preencher o formulário
+        function buscarDetalhesProduto() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idProduto = urlParams.get('id');
+
+            // Simulação de busca no banco de dados
+            if (idProduto === "1") {
+                document.getElementById('id_produto').value = "1";
+                document.getElementById('nome_produto').value = "Produto Exemplo";
+                document.getElementById('preco_produto').value = "100";
+                document.getElementById('id_produto_fornecedor').value = "1";
+            } else {
+                alert("Produto não encontrado");
+            }
+        }
+
+        // Carregar os detalhes do produto ao carregar a página
+        window.onload = buscarDetalhesProduto;
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Edição de Produto</h2>
+        <form>
+            <input type="hidden" id="id_produto">
+            <input type="text" id="nome_produto" placeholder="Nome do Produto" required>
+            <input type="number" id="preco_produto" placeholder="Preço do Produto" required>
+            <input type="number" id="id_produto_fornecedor" placeholder="ID do Fornecedor" required>
+            <button type="submit">Atualizar</button>
+            <button type="button" onclick="window.history.back()">Cancelar</button>
+        </form>
+    </div>
+</body>
+</html>

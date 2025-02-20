@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta e Exibição de Pedidos</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para exibir lista de pedidos
+        function exibirPedidos() {
+            const pedidos = [
+                { id: 1, usuario: "Usuário Exemplo", produto: "Produto Exemplo", quantidade: 10, preco: 1000 }
+                // Adicione outros pedidos aqui
+            ];
+
+            const listaPedidos = document.getElementById('lista_pedidos');
+            listaPedidos.innerHTML = ''; // Limpa a lista
+
+            pedidos.forEach(pedido => {
+                const pedidoItem = document.createElement('div');
+                pedidoItem.className = 'pedido-item';
+                pedidoItem.innerHTML = `
+                    <p>ID: ${pedido.id}</p>
+                    <p>Usuário: ${pedido.usuario}</p>
+                    <p>Produto: ${pedido.produto}</p>
+                    <p>Quantidade: ${pedido.quantidade}</p>
+                    <p>Preço: ${pedido.preco}</p>
+                    <button onclick="visualizarPedido(${pedido.id})">Visualizar</button>
+                    <button onclick="editarPedido(${pedido.id})">Editar</button>
+                `;
+                listaPedidos.appendChild(pedidoItem);
+            });
+        }
+
+        // Função para redirecionar para a página de visualização
+        function visualizarPedido(id) {
+            window.location.href = `visualizar_pedido.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarPedido(id) {
+            window.location.href = `editar_pedido.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de novo pedido
+        function novoPedido() {
+            window.location.href = `novo_pedido.html`;
+        }
+
+        // Carregar pedidos ao carregar a página
+        window.onload = exibirPedidos;
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Consulta e Exibição de Pedidos</h2>
+        <button onclick="novoPedido()">Novo Pedido</button>
+        <div id="lista_pedidos" class="lista-pedidos">
+            <!-- Lista de pedidos será exibida aqui -->
+        </div>
+    </div>
+</body>
+</html>
