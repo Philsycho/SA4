@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Usuários - SA4</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Função para buscar e exibir os usuários
+        async function exibirUsuarios() {
+            try {
+                const response = await fetch('http://localhost:3000/usuarios');
+                const usuarios = await response.json();
+
+                const listaUsuarios = document.getElementById('lista_usuarios');
+                listaUsuarios.innerHTML = ''; // Limpa a lista
+
+                usuarios.forEach(usuario => {
+                    const usuarioItem = document.createElement('div');
+                    usuarioItem.className = 'usuario-item';
+                    usuarioItem.innerHTML = `
+                        <p>ID: ${usuario.id_usuario}</p>
+                        <p>Nome: ${usuario.nome_usuario}</p>
+                        <p>Email: ${usuario.email_usuario}</p>
+                        <button onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
+                    `;
+                    listaUsuarios.appendChild(usuarioItem);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar usuários:', error);
+                alert('Erro ao carregar a lista de usuários');
+            }
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarUsuario(id) {
+            window.location.href = `usuario_editar.html?id=${id}`;
+        }
+
+        // Carrega os usuários ao abrir a página
+        window.onload = exibirUsuarios;
+    </script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <span class="page-title">Consultar Usuários</span>
+        <div class="user-info">
+            <span>Bem-vindo, <span id="username"></span></span>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <div class="consultar-container">
+        <h2>Consultar Usuários</h2>
+        <div id="lista_usuarios" class="lista-usuarios">
+            <!-- Lista de usuários será exibida aqui -->
+        </div>
+        <div class="menu">
+            <button onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Verifica se o usuário está logado
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            // Exibe o nome do usuário na navbar
+            document.getElementById('username').textContent = user.nome_usuario;
+        }
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html> 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta e Exibição de Produtos</title>
+    <title>Consultar Produtos - SA4</title>
     <link rel="stylesheet" href="style.css">
     <script>
         // Função para exibir lista de produtos
@@ -46,11 +46,40 @@
     </script>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Consulta e Exibição de Produtos</h2>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <span class="page-title">Consultar Produtos</span>
+        <div class="user-info">
+            <span>Bem-vindo, <span id="username"></span></span>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <div class="consultar-container">
+        <h2>Consultar Produtos</h2>
         <div id="lista_produtos" class="lista-produtos">
             <!-- Lista de produtos será exibida aqui -->
         </div>
+        <div class="menu">
+            <button onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+        </div>
     </div>
+
+    <script>
+        // Verifica se o usuário está logado
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            // Exibe o nome do usuário na navbar
+            document.getElementById('username').textContent = user.nome_usuario;
+        }
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
 </html>

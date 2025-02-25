@@ -42,3 +42,126 @@ body {
 .login-container button:hover {
     background-color: #0056b3;
 }
+
+.welcome-container {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.welcome-container h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.welcome-container p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+#countdown {
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #007bff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between; /* Alinha os elementos nas extremidades */
+    align-items: center;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-right: auto; /* Empurra o título para a esquerda */
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info span {
+    color: #fff;
+    font-weight: bold;
+}
+
+.user-info button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.user-info button:hover {
+    background-color: #c82333;
+}
+
+/* Ajuste no container das páginas para considerar a navbar */
+.dashboard-container,
+.consultar-container {
+    margin-top: 80px; /* Espaço para a navbar */
+}
+
+.consultar-container {
+    padding: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lista-usuarios {
+    margin-top: 20px;
+}
+
+.usuario-item {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.usuario-item p {
+    margin: 5px 0;
+}
+
+.usuario-item button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.usuario-item button:hover {
+    background-color: #0056b3;
+}

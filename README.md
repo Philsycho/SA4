@@ -1,5 +1,12 @@
 # SA4
- 
+
+## Dependências do Projeto
+
+- [express](https://expressjs.com/) - Framework web para Node.js
+- [mysql2](https://www.npmjs.com/package/mysql2) - Driver MySQL para Node.js
+- [express-session](https://www.npmjs.com/package/express-session) - Middleware para gerenciamento de sessões
+- [cors](https://www.npmjs.com/package/cors) - Middleware para habilitar CORS (Cross-Origin Resource Sharing)
+
 ## Banco de dados
 
 -usuario\
