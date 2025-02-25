@@ -31,11 +31,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message) {
-                    alert(data.message); // Exibe a mensagem do backend
-                    if (data.redirect) {
-                        window.location.href = data.redirect; // Redireciona para a página de produtos
-                    }
+                if (data.success) {
+                    alert("Login realizado com sucesso!");
+                    window.location.href = "tela_inicial.html"; // Redireciona para a tela inicial
+                } else {
+                    alert(data.message || "Usuário ou senha incorretos.");
                 }
             })
             .catch(error => {

@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+
 const app = express();
 const port = 3000;
 
@@ -12,7 +13,7 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', // Ajuste conforme necessário
     password: '', // Ajuste conforme necessário
-    database: 'teste_sistemas'
+    database: 'sa4'
 });
 
 // Conectar ao banco de dados
@@ -27,16 +28,23 @@ db.connect(err => {
 // Rota de login
 app.post('/login', (req, res) => {
     const { nome_usuario, senha_usuario } = req.body;
+
+    if (!nome_usuario || !senha_usuario) {
+        return res.status(400).json({ message: 'Preencha usuário e senha!' });
+    }
+
+    const sql = 'SELECT * FROM usuario WHERE BINARY nome_usuario = ? AND BINARY senha_usuario = ?';
     
-    db.query('SELECT * FROM usuarios WHERE usuario = ? AND senha = ?', [nome_usuario, senha_usuario], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
+    db.query(sql, [nome_usuario.trim(), senha_usuario.trim()], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: 'Erro ao processar a solicitação' });
+        }
+
         if (results.length === 0) {
             return res.status(401).json({ message: 'Usuário ou senha inválidos!' });
         }
 
-        // Login bem-sucedido
-        res.json({ message: 'Login realizado com sucesso!', redirect: 'tela_inicial.html' });
+        res.json({ success: true, message: 'Login realizado com sucesso!' });
     });
 });
 

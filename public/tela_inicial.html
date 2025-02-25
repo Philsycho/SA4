@@ -1,11 +1,28 @@
-|<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Tela Inicial</title>
 </head>
 <body>
-    <h1> tela inicial</h1>
+    <h1>Tela Inicial</h1>
+
+    <ul>
+        <li><button onclick="redirecionar('pedido_consultar.html')">Consultar Pedido</button></li>
+        <li><button onclick="redirecionar('pedido_editar.html')">Editar Pedido</button></li>
+        <li><button onclick="redirecionar('pedido_novo.html')">Novo Pedido</button></li>
+        <li><button onclick="redirecionar('pedido_visualizar.html')">Visualizar Pedido</button></li>
+        <li><button onclick="redirecionar('registro.html')">Registrar Usuário</button></li>
+        <li><button onclick="redirecionar('produto_visualizar.html')">Visualizar Produto</button></li>
+        <li><button onclick="redirecionar('produto_consultar.html')">Consultar Produto</button></li>
+        <li><button onclick="redirecionar('produto_editar.html')">Editar produto</button></li>
+    </ul>
+
+    <script>
+        function redirecionar(pagina) {
+            window.location.href = pagina;
+        }
+    </script>
 </body>
 </html>
