@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produto</title>
+</head>
+<body>
+    <h1>Cadastro de Produto</h1>
+
+    <form id="produtoForm">
+        <label for="nome_produto">Nome do Produto:</label>
+        <input type="text" id="nome_produto" required>
+        
+        <label for="preco_produto">Preço:</label>
+        <input type="number" id="preco_produto" step="0.01" required>
+
+        <label for="id_produto_fornecedor">Fornecedor:</label>
+        <input type="number" id="id_produto_fornecedor" required>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <script>
+        document.getElementById("produtoForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nome_produto = document.getElementById("nome_produto").value;
+            const preco_produto = document.getElementById("preco_produto").value;
+            const id_produto_fornecedor = document.getElementById("id_produto_fornecedor").value;
+
+            fetch("http://localhost:3000/produto", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nome_produto, preco_produto, id_produto_fornecedor })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById("produtoForm").reset();
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar produto:", error);
+                alert("Erro ao cadastrar produto.");
+            });
+        });
+    </script>
+</body>
+</html>

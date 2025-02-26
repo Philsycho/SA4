@@ -9,14 +9,65 @@
 <body>
     <div class="login-container">
         <h2>Novo Pedido</h2>
-        <form>
-            <input type="text" id="usuario_pedido" placeholder="Usuário" required>
-            <input type="text" id="produto_pedido" placeholder="Produto" required>
+        <form id="pedidoForm">
+            <input type="text" id="usuario_pedido" placeholder="ID do Usuário" required>
+            <input type="text" id="produto_pedido" placeholder="ID do Produto" required>
             <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
             <input type="number" id="preco_pedido" placeholder="Preço" required>
-            <button type="submit">Registrar</button>
-            <button type="button" onclick="window.history.back()">Cancelar</button>
+            <input type="text" id="fornecedor_pedido" placeholder="ID do Fornecedor" required>
+            <div class="botoes-container">
+                <button type="button" onclick="window.history.back()">Cancelar</button>
+                <button type="submit">Registrar</button>
+            </div>
         </form>
     </div>
+
+    <script>
+        document.getElementById('pedidoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const usuario = document.getElementById('usuario_pedido').value;
+            const produto = document.getElementById('produto_pedido').value;
+            const quantidade = document.getElementById('quantidade_pedido').value;
+            const preco = document.getElementById('preco_pedido').value;
+            const fornecedor = document.getElementById('fornecedor_pedido').value;
+
+            const pedidoData = {
+                id_usuario_pedido: usuario,
+                id_produto_pedido: produto,
+                quantidade_produto: quantidade,
+                preco_produto_pedido: preco,
+                id_fornecedor_pedido: fornecedor
+            };
+
+            // Enviar os dados para o servidor
+            fetch('http://localhost:3000/pedido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(pedidoData),
+            })
+            .then(response => response.text())  // Mudança para .text() para verificar a resposta em texto
+            .then(data => {
+                try {
+                    const jsonData = JSON.parse(data);  // Converter para JSON se a resposta for válida
+                    if (jsonData.message) {
+                        alert(jsonData.message); // Mostra a mensagem do servidor
+                        window.location.href = "pedido_novo.html"; // Redireciona para a página inicial ou outra desejada
+                    } else {
+                        alert('Erro ao registrar pedido!');
+                    }
+                } catch (e) {
+                    console.error("Erro ao processar resposta JSON:", e);
+                    alert('Erro ao registrar pedido!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro ao registrar pedido!');
+            });
+        });
+    </script>
 </body>
 </html>

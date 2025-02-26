@@ -1,11 +1,9 @@
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
     background-color: #f0f0f0;
+    overflow-x: hidden;
 }
 
 .login-container {
@@ -41,4 +39,267 @@ body {
 
 .login-container button:hover {
     background-color: #0056b3;
+}
+
+.botoes-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.botoes-container button {
+    margin: 0;
+    padding: 8px 16px;
+    width: auto; /* Remove a largura fixa herdada */
+}
+
+/* Sobrescreve a regra anterior de largura fixa para botões dentro do login-container */
+.login-container .botoes-container button {
+    width: auto;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu-buttons button {
+    width: 100%;
+    text-align: left;
+    padding: 10px 16px;
+}
+
+/* Botão do menu hambúrguer */
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    background: #007bff;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    transition: 0.3s;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 999;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: #007bff;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.menu-section {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-section h3 {
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-section button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.2s;
+}
+
+.menu-section button:hover {
+    background: #f0f0f0;
+    color: #007bff;
+}
+
+.menu-section i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Conteúdo principal */
+.content {
+    margin-left: 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+    .content {
+        margin-left: 320px;
+    }
+    
+    .sidebar {
+        left: 0;
+    }
+    
+    .menu-toggle {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .content {
+        margin-left: 0;
+    }
+}
+
+/* Estilo para o botão de logout */
+.logout-button {
+    color: #dc3545 !important;
+    border-top: 1px solid #eee;
+    margin-top: auto !important;
+}
+
+.logout-button:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Ajuste na sidebar para garantir que o botão de logout fique no final */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-section:last-child {
+    margin-top: auto;
+    border-bottom: none;
+}
+
+/* Estilos específicos para a página de login */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #ffffff; /* Alterado para branco puro */
+}
+
+.login-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    margin: 20px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-header i {
+    font-size: 4rem;
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.login-header h2 {
+    color: #333;
+    margin: 0;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #007bff;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 40px;
+    border: 2px solid #e1e1e1;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.login-container button:hover {
+    background: #0056b3;
+}
+
+.login-container button i {
+    font-size: 1.2rem;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .login-container {
+        margin: 10px;
+        padding: 1.5rem;
+    }
 }
