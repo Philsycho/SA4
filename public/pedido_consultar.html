@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Pedidos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Consulta de Pedidos</h2>
+            </div>
+            <div class="botoes-container">
+                <button onclick="novoPedido()">
+                    <i class="fas fa-plus"></i> Novo Pedido
+                </button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço</th>
+                            <th>Fornecedor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista_pedidos">
+                        <!-- Lista de pedidos será exibida aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        // Função para formatar preço em Reais
+        function formatarPreco(preco) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(preco);
+        }
+
+        // Função para exibir lista de pedidos
+        function exibirPedidos() {
+            fetch('http://localhost:3000/pedido')
+                .then(response => response.json())
+                .then(pedidos => {
+                    const listaPedidos = document.getElementById('lista_pedidos');
+                    listaPedidos.innerHTML = ''; // Limpa a lista
+
+                    pedidos.forEach(pedido => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${pedido.id_pedido}</td>
+                            <td>${pedido.id_usuario_pedido}</td>
+                            <td>${pedido.id_produto_pedido}</td>
+                            <td>${pedido.quantidade_produto}</td>
+                            <td>${formatarPreco(pedido.preco_produto_pedido)}</td>
+                            <td>${pedido.id_fornecedor_pedido}</td>
+                            <td>
+                                <div class="botoes-container">
+                                    <button onclick="visualizarPedido(${pedido.id_pedido})">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button onclick="editarPedido(${pedido.id_pedido})">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        listaPedidos.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar pedidos:', error);
+                    alert('Erro ao carregar pedidos. Verifique se o servidor está rodando.');
+                });
+        }
+
+        // Função para redirecionar para a página de visualização
+        function visualizarPedido(id) {
+            window.location.href = `pedido_visualizar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarPedido(id) {
+            window.location.href = `pedido_editar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de novo pedido
+        function novoPedido() {
+            window.location.href = 'pedido_novo.html';
+        }
+
+        // Carregar pedidos ao carregar a página
+        window.onload = exibirPedidos;
+    </script>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .botoes-container {
+            margin-bottom: 1rem;
+        }
+
+        td .botoes-container {
+            margin: 0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        td .botoes-container button {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</body>
+</html>

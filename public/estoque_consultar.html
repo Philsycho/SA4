@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-boxes"></i>
+                <h2>Consulta de Estoque</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Produto</th>
+                            <th>Fornecedor</th>
+                            <th>Quantidade</th>
+                            <th>Usuário</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista_estoque">
+                        <!-- Lista de movimentações será exibida aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        // Função para formatar data
+        function formatarData(dataString) {
+            const data = new Date(dataString);
+            return data.toLocaleString('pt-BR');
+        }
+
+        // Função para exibir lista de movimentações
+        function exibirEstoque() {
+            fetch('http://localhost:3000/estoque')
+                .then(response => response.json())
+                .then(movimentacoes => {
+                    const listaEstoque = document.getElementById('lista_estoque');
+                    listaEstoque.innerHTML = ''; // Limpa a lista
+
+                    movimentacoes.forEach(mov => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${mov.id_movimento}</td>
+                            <td>
+                                <span class="badge ${mov.id_tipo_movimento === 'entrada' ? 'badge-success' : 'badge-danger'}">
+                                    ${mov.id_tipo_movimento === 'entrada' ? 
+                                        '<i class="fas fa-arrow-down"></i> Entrada' : 
+                                        '<i class="fas fa-arrow-up"></i> Saída'}
+                                </span>
+                            </td>
+                            <td>${mov.id_produto_estoque}</td>
+                            <td>${mov.id_fornecedor_estoque}</td>
+                            <td>${mov.quantidade_movimentado}</td>
+                            <td>${mov.id_usuario_estoque}</td>
+                            <td>${formatarData(mov.data_movimento)}</td>
+                        `;
+                        listaEstoque.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar movimentações:', error);
+                    alert('Erro ao carregar movimentações. Verifique se o servidor está rodando.');
+                });
+        }
+
+        // Carregar movimentações ao carregar a página
+        window.onload = exibirEstoque;
+    </script>
+
+    <style>
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+        }
+
+        .badge-danger {
+            background-color: #dc3545;
+        }
+    </style>
+</body>
+</html> 

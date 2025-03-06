@@ -1,0 +1,327 @@
+/* Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Container Principal */
+.login-container, .container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 800px;
+}
+
+.login-container {
+    max-width: 400px;
+}
+
+/* Cabeçalho */
+.login-header, .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.login-header i, .header i {
+    font-size: 3rem;
+    color: #2193b0;
+    margin-bottom: 1rem;
+}
+
+.login-header h2, .header h2 {
+    font-size: 1.8rem;
+    color: #333;
+}
+
+/* Grupos de Input */
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2193b0;
+    font-size: 1.2rem;
+}
+
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 12px 40px;
+    border: 2px solid #e1e1e1;
+    border-radius: 25px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus, .input-group select:focus {
+    outline: none;
+    border-color: #2193b0;
+    box-shadow: 0 0 0 3px rgba(33, 147, 176, 0.1);
+}
+
+/* Botões */
+.botoes-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+button {
+    background: #2193b0;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+button:hover {
+    background: #1b7a8d;
+    transform: translateY(-2px);
+}
+
+button i {
+    font-size: 1.1rem;
+}
+
+button[type="button"] {
+    background: #6c757d;
+}
+
+button[type="button"]:hover {
+    background: #5a6268;
+}
+
+/* Listas de Itens */
+.lista-produtos, .lista-pedidos {
+    margin-top: 2rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.produto-item, .pedido-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.produto-item p, .pedido-item p {
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+/* Menu Lateral */
+.sidebar {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.menu-section {
+    margin-bottom: 2rem;
+}
+
+.menu-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.menu-section button {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.menu-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+}
+
+.menu-toggle i {
+    font-size: 1.5rem;
+    color: #2193b0;
+}
+
+/* Conteúdo Principal */
+.content {
+    margin-left: 0;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content.shifted {
+    margin-left: 300px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .login-container, .container {
+        padding: 1.5rem;
+    }
+
+    .botoes-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        left: -100%;
+    }
+
+    .content.shifted {
+        margin-left: 0;
+    }
+}
+
+/* Tabelas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+th {
+    background: #2193b0;
+    color: white;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+/* Mensagens de Alerta */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Logout Button */
+.logout-button {
+    background: #dc3545;
+    width: 100%;
+}
+
+.logout-button:hover {
+    background: #c82333;
+}
+
+/* Form Labels */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Tela Inicial */
+.welcome-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+.welcome-container h1 {
+    color: #2193b0;
+    margin-bottom: 1rem;
+}
+
+.welcome-container p {
+    color: #666;
+    font-size: 1.1rem;
+}

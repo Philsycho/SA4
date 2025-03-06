@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-user-circle"></i>
+            <h2>Login</h2>
+        </div>
+        <form id="loginForm">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="nome_usuario" placeholder="Usuário" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="senha_usuario" placeholder="Senha" required>
+            </div>
+            <button type="submit">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const nome_usuario = document.getElementById("nome_usuario").value;
+            const senha_usuario = document.getElementById("senha_usuario").value;
+            
+            fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nome_usuario, senha_usuario })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Armazena os dados completos do usuário no localStorage
+                    localStorage.setItem('usuario', JSON.stringify({
+                        ...data.usuario,
+                        logado: true
+                    }));
+                    window.location.href = "tela_inicial.html"; // Redireciona para a tela inicial
+                } else {
+                    alert(data.message || "Usuário ou senha incorretos.");
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao tentar fazer login:', error);
+                alert("Erro ao tentar fazer login. Verifique se o servidor está rodando.");
+            });
+        });
+    </script>
+</body>
+</html>

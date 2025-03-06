@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Produtos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-search"></i>
+                <h2>Consulta de Produtos</h2>
+            </div>
+            <div id="lista_produtos" class="lista-produtos">
+                <!-- Lista de produtos será exibida aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        // Função para formatar preço em Reais
+        function formatarPreco(preco) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(preco);
+        }
+
+        // Função para exibir lista de produtos
+        function exibirProdutos() {
+            fetch('http://localhost:3000/produto')
+                .then(response => response.json())
+                .then(produtos => {
+                    const listaProdutos = document.getElementById('lista_produtos');
+                    listaProdutos.innerHTML = ''; // Limpa a lista
+
+                    produtos.forEach(produto => {
+                        const produtoItem = document.createElement('div');
+                        produtoItem.className = 'produto-item';
+                        produtoItem.innerHTML = `
+                            <p><strong><i class="fas fa-hashtag"></i> ID:</strong> ${produto.id_produto}</p>
+                            <p><strong><i class="fas fa-box"></i> Nome:</strong> ${produto.nome_produto}</p>
+                            <p><strong><i class="fas fa-dollar-sign"></i> Preço:</strong> ${formatarPreco(produto.preco_produto)}</p>
+                            <p><strong><i class="fas fa-building"></i> Fornecedor:</strong> ${produto.id_produto_fornecedor}</p>
+                            <div class="botoes-container">
+                                <button onclick="visualizarProduto(${produto.id_produto})">
+                                    <i class="fas fa-eye"></i> Visualizar
+                                </button>
+                                <button onclick="editarProduto(${produto.id_produto})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                            </div>
+                        `;
+                        listaProdutos.appendChild(produtoItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar produtos:', error);
+                    alert('Erro ao carregar produtos. Verifique se o servidor está rodando.');
+                });
+        }
+
+        // Função para redirecionar para a página de visualização
+        function visualizarProduto(id) {
+            window.location.href = `produto_visualizar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarProduto(id) {
+            window.location.href = `produto_editar.html?id=${id}`;
+        }
+
+        // Carregar produtos ao carregar a página
+        window.onload = exibirProdutos;
+    </script>
+</body>
+</html>

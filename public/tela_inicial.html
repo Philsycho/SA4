@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela Inicial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-home"></i> Menu Principal</h2>
+            <button class="close-btn" onclick="toggleMenu()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="menu-section">
+            <h3><i class="fas fa-box"></i> Produtos</h3>
+            <button onclick="redirecionar('cadastro_produto.html')">
+                <i class="fas fa-plus"></i> Cadastrar Produto
+            </button>
+            <button onclick="redirecionar('produto_consultar.html')">
+                <i class="fas fa-search"></i> Consultar Produto
+            </button>
+            <button onclick="redirecionar('produto_editar.html')">
+                <i class="fas fa-edit"></i> Editar Produto
+            </button>
+            <button onclick="redirecionar('produto_visualizar.html')">
+                <i class="fas fa-eye"></i> Visualizar Produto
+            </button>
+        </div>
+
+        <div class="menu-section">
+            <h3><i class="fas fa-shopping-cart"></i> Pedidos</h3>
+            <button onclick="redirecionar('pedido_novo.html')">
+                <i class="fas fa-plus"></i> Novo Pedido
+            </button>
+            <button onclick="redirecionar('pedido_consultar.html')">
+                <i class="fas fa-search"></i> Consultar Pedido
+            </button>
+            <button onclick="redirecionar('pedido_editar.html')">
+                <i class="fas fa-edit"></i> Editar Pedido
+            </button>
+            <button onclick="redirecionar('pedido_visualizar.html')">
+                <i class="fas fa-eye"></i> Visualizar Pedido
+            </button>
+        </div>
+
+        <div class="menu-section">
+            <h3><i class="fas fa-user"></i> Usuários</h3>
+            <button onclick="redirecionar('registro.html')">
+                <i class="fas fa-user-plus"></i> Registrar Usuário
+            </button>
+        </div>
+
+        <div class="menu-section">
+            <button onclick="fazerLogout()" class="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="welcome-container">
+            <h1><i class="fas fa-home"></i> Bem-vindo ao Sistema</h1>
+            <p id="welcome-message">Selecione uma opção no menu lateral para começar</p>
+        </div>
+    </div>
+
+    <script>
+        function redirecionar(pagina) {
+            window.location.href = pagina;
+        }
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.content').classList.toggle('shifted');
+        }
+
+        function fazerLogout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Verificar se o usuário está logado e personalizar a mensagem
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioData = localStorage.getItem('usuario');
+            if (!usuarioData) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const usuario = JSON.parse(usuarioData);
+                if (!usuario.logado) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Personalizar mensagem de boas-vindas
+                const welcomeMessage = document.getElementById('welcome-message');
+                welcomeMessage.textContent = `Olá ${usuario.nome_usuario}! Selecione uma opção no menu lateral para começar.`;
+            } catch (error) {
+                console.error('Erro ao verificar login:', error);
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
