@@ -14,7 +14,7 @@
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>Menu Principal</h2>
+            <h2><i class="fas fa-home"></i> Menu Principal</h2>
             <button class="close-btn" onclick="toggleMenu()">
                 <i class="fas fa-times"></i>
             </button>
@@ -67,8 +67,10 @@
     </div>
 
     <div class="content">
-        <h1>Bem-vindo ao Sistema</h1>
-        <p>Selecione uma opção no menu para começar</p>
+        <div class="welcome-container">
+            <h1><i class="fas fa-home"></i> Bem-vindo ao Sistema</h1>
+            <p id="welcome-message">Selecione uma opção no menu lateral para começar</p>
+        </div>
     </div>
 
     <script>
@@ -78,14 +80,37 @@
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.content').classList.toggle('shifted');
         }
 
         function fazerLogout() {
-            // Limpar dados do localStorage
             localStorage.clear();
-            // Redirecionar para a página inicial (login)
             window.location.href = 'index.html';
         }
+
+        // Verificar se o usuário está logado e personalizar a mensagem
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioData = localStorage.getItem('usuario');
+            if (!usuarioData) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const usuario = JSON.parse(usuarioData);
+                if (!usuario.logado) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // Personalizar mensagem de boas-vindas
+                const welcomeMessage = document.getElementById('welcome-message');
+                welcomeMessage.textContent = `Olá ${usuario.nome_usuario}! Selecione uma opção no menu lateral para começar.`;
+            } catch (error) {
+                console.error('Erro ao verificar login:', error);
+                window.location.href = 'index.html';
+            }
+        });
     </script>
 </body>
 </html>

@@ -5,69 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novo Pedido</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="form.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2>Novo Pedido</h2>
-        <form id="pedidoForm">
-            <input type="text" id="usuario_pedido" placeholder="ID do Usuário" required>
-            <input type="text" id="produto_pedido" placeholder="ID do Produto" required>
-            <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
-            <input type="number" id="preco_pedido" placeholder="Preço" required>
-            <input type="text" id="fornecedor_pedido" placeholder="ID do Fornecedor" required>
-            <div class="botoes-container">
-                <button type="button" onclick="window.history.back()">Cancelar</button>
-                <button type="submit">Registrar</button>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-plus"></i>
+                <h2>Novo Pedido</h2>
             </div>
-        </form>
+            <form id="form_pedido" class="form-container">
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="number" id="id_usuario" name="id_usuario" placeholder="ID do Usuário" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <input type="number" id="id_produto" name="id_produto" placeholder="ID do Produto" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-sort-amount-up"></i>
+                    </div>
+                    <input type="number" id="quantidade" name="quantidade" placeholder="Quantidade" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <input type="number" id="preco" name="preco" step="0.01" placeholder="Preço" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <input type="number" id="id_fornecedor" name="id_fornecedor" placeholder="ID do Fornecedor" required>
+                </div>
+                <button type="submit">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </form>
+        </div>
     </div>
 
+    <script src="base.js"></script>
     <script>
-        document.getElementById('pedidoForm').addEventListener('submit', function (e) {
+        // Configurar o formulário
+        document.getElementById('form_pedido').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const usuario = document.getElementById('usuario_pedido').value;
-            const produto = document.getElementById('produto_pedido').value;
-            const quantidade = document.getElementById('quantidade_pedido').value;
-            const preco = document.getElementById('preco_pedido').value;
-            const fornecedor = document.getElementById('fornecedor_pedido').value;
 
-            const pedidoData = {
-                id_usuario_pedido: usuario,
-                id_produto_pedido: produto,
-                quantidade_produto: quantidade,
-                preco_produto_pedido: preco,
-                id_fornecedor_pedido: fornecedor
+            const dadosPedido = {
+                id_usuario_pedido: document.getElementById('id_usuario').value,
+                id_produto_pedido: document.getElementById('id_produto').value,
+                quantidade_produto: document.getElementById('quantidade').value,
+                preco_produto_pedido: document.getElementById('preco').value,
+                id_fornecedor_pedido: document.getElementById('id_fornecedor').value
             };
 
-            // Enviar os dados para o servidor
             fetch('http://localhost:3000/pedido', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(pedidoData),
+                body: JSON.stringify(dadosPedido)
             })
-            .then(response => response.text())  // Mudança para .text() para verificar a resposta em texto
+            .then(response => response.json())
             .then(data => {
-                try {
-                    const jsonData = JSON.parse(data);  // Converter para JSON se a resposta for válida
-                    if (jsonData.message) {
-                        alert(jsonData.message); // Mostra a mensagem do servidor
-                        window.location.href = "pedido_novo.html"; // Redireciona para a página inicial ou outra desejada
-                    } else {
-                        alert('Erro ao registrar pedido!');
-                    }
-                } catch (e) {
-                    console.error("Erro ao processar resposta JSON:", e);
-                    alert('Erro ao registrar pedido!');
+                if (data.error) {
+                    throw new Error(data.error);
                 }
+                alert('Pedido criado com sucesso!');
+                window.location.href = 'pedido_consultar.html';
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Erro ao registrar pedido!');
+                console.error('Erro ao criar pedido:', error);
+                alert('Erro ao criar pedido. Verifique se o servidor está rodando.');
             });
         });
     </script>
+
+    <style>
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .icon-container {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-container i {
+            color: #007bff;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.5rem;
+            padding-left: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </body>
 </html>

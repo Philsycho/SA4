@@ -43,6 +43,34 @@ app.post('/login', (req, res) => {
     });
 });
 
+// 🟢 REGISTRO DE USUÁRIO
+app.post('/usuario', (req, res) => {
+    const { nome_usuario, email_usuario, senha_usuario } = req.body;
+
+    // Verificar se o usuário já existe
+    const checkSql = "SELECT * FROM usuario WHERE nome_usuario = ? OR email_usuario = ?";
+    db.query(checkSql, [nome_usuario, email_usuario], (err, results) => {
+        if (err) {
+            console.error('❌ Erro ao verificar usuário:', err);
+            return res.status(500).json({ error: 'Erro ao verificar usuário' });
+        }
+
+        if (results.length > 0) {
+            return res.status(400).json({ message: 'Usuário ou email já cadastrado!' });
+        }
+
+        // Inserir novo usuário
+        const insertSql = "INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario) VALUES (?, ?, ?)";
+        db.query(insertSql, [nome_usuario, email_usuario, senha_usuario], (err, result) => {
+            if (err) {
+                console.error('❌ Erro ao cadastrar usuário:', err);
+                return res.status(500).json({ error: 'Erro ao cadastrar usuário' });
+            }
+            res.json({ success: true, message: '✅ Usuário cadastrado com sucesso!', id: result.insertId });
+        });
+    });
+});
+
 // 🟢 CADASTRO DE PRODUTO
 app.post('/produto', (req, res) => {
     const { nome_produto, preco_produto, id_produto_fornecedor } = req.body;
@@ -69,7 +97,23 @@ app.get('/produto', (req, res) => {
     });
 });
 
-// 🟢 EDITAR PRODUTO
+// 🟢 BUSCAR PRODUTO POR ID
+app.get('/produto/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = "SELECT * FROM produto WHERE id_produto = ?";
+    db.query(sql, [id], (err, results) => {
+        if (err) {
+            console.error('❌ Erro ao buscar produto:', err);
+            return res.status(500).json({ error: 'Erro ao buscar produto' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
+        }
+        res.json(results[0]);
+    });
+});
+
+// 🟢 ATUALIZAR PRODUTO
 app.put('/produto/:id', (req, res) => {
     const { id } = req.params;
     const { nome_produto, preco_produto, id_produto_fornecedor } = req.body;
@@ -77,8 +121,11 @@ app.put('/produto/:id', (req, res) => {
     const sql = "UPDATE produto SET nome_produto = ?, preco_produto = ?, id_produto_fornecedor = ? WHERE id_produto = ?";
     db.query(sql, [nome_produto, preco_produto, id_produto_fornecedor, id], (err, result) => {
         if (err) {
-            console.error('❌ Erro ao editar produto:', err);
-            return res.status(500).json({ error: 'Erro ao editar produto' });
+            console.error('❌ Erro ao atualizar produto:', err);
+            return res.status(500).json({ error: 'Erro ao atualizar produto' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Produto não encontrado' });
         }
         res.json({ message: "✅ Produto atualizado com sucesso!" });
     });
@@ -101,36 +148,37 @@ app.delete('/produto/:id', (req, res) => {
 // 🟢 CADASTRO DE PEDIDO
 app.post('/pedido', (req, res) => {
     const { id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido } = req.body;
-
-    // Inserir pedido na tabela 'pedido'
-    const sql = "INSERT INTO pedido (id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido) VALUES (?, ?, ?, ?, ?)";
+    
+    const sql = `
+        INSERT INTO pedido (
+            id_usuario_pedido, 
+            id_produto_pedido, 
+            quantidade_produto, 
+            preco_produto_pedido, 
+            id_fornecedor_pedido
+        ) VALUES (?, ?, ?, ?, ?)
+    `;
+    
     db.query(sql, [id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido], (err, result) => {
         if (err) {
-            console.error('❌ Erro ao cadastrar pedido:', err);
-            return res.status(500).json({ error: 'Erro ao cadastrar pedido' });
+            console.error('Erro ao criar pedido:', err);
+            res.status(500).json({ error: 'Erro ao criar pedido' });
+            return;
         }
-
-        // Registrar movimentação no estoque
-        const sqlEstoque = "INSERT INTO estoque (id_tipo_movimento, id_produto_estoque, id_fornecedor_estoque, quantidade_movimentado, id_usuario_estoque, id_pedido_estoque) VALUES ('saida', ?, ?, ?, ?, ?)";
-        db.query(sqlEstoque, [id_produto_pedido, id_fornecedor_pedido, quantidade_produto, id_usuario_pedido, result.insertId], (err) => {
-            if (err) {
-                console.error('❌ Erro ao registrar movimentação no estoque:', err);
-                return res.status(500).json({ error: 'Erro ao registrar movimentação no estoque' });
-            }
-            res.json({ message: "✅ Pedido cadastrado com sucesso!", id: result.insertId });
-        });
+        res.json({ message: 'Pedido criado com sucesso', id: result.insertId });
     });
 });
 
 // 🟢 LISTAR PEDIDOS
 app.get('/pedido', (req, res) => {
-    const sql = "SELECT * FROM pedido";
-    db.query(sql, (err, results) => {
+    const sql = 'SELECT * FROM pedido';
+    db.query(sql, (err, result) => {
         if (err) {
-            console.error('❌ Erro ao buscar pedidos:', err);
-            return res.status(500).json({ error: 'Erro ao buscar pedidos' });
+            console.error('Erro ao buscar pedidos:', err);
+            res.status(500).json({ error: 'Erro ao buscar pedidos' });
+            return;
         }
-        res.json(results);
+        res.json(result);
     });
 });
 
@@ -160,6 +208,53 @@ app.delete('/pedido/:id', (req, res) => {
             return res.status(500).json({ error: 'Erro ao excluir pedido' });
         }
         res.json({ message: "✅ Pedido excluído com sucesso!" });
+    });
+});
+
+// Rota para buscar pedido por ID
+app.get('/pedido/:id', (req, res) => {
+    const id = req.params.id;
+    const sql = 'SELECT * FROM pedido WHERE id_pedido = ?';
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error('Erro ao buscar pedido:', err);
+            res.status(500).json({ error: 'Erro ao buscar pedido' });
+            return;
+        }
+        if (result.length === 0) {
+            res.status(404).json({ error: 'Pedido não encontrado' });
+            return;
+        }
+        res.json(result[0]);
+    });
+});
+
+// Rota para atualizar pedido
+app.put('/pedido/:id', (req, res) => {
+    const id = req.params.id;
+    const { id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido } = req.body;
+    
+    const sql = `
+        UPDATE pedido 
+        SET id_usuario_pedido = ?, 
+            id_produto_pedido = ?, 
+            quantidade_produto = ?, 
+            preco_produto_pedido = ?, 
+            id_fornecedor_pedido = ? 
+        WHERE id_pedido = ?
+    `;
+    
+    db.query(sql, [id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido, id], (err, result) => {
+        if (err) {
+            console.error('Erro ao atualizar pedido:', err);
+            res.status(500).json({ error: 'Erro ao atualizar pedido' });
+            return;
+        }
+        if (result.affectedRows === 0) {
+            res.status(404).json({ error: 'Pedido não encontrado' });
+            return;
+        }
+        res.json({ message: 'Pedido atualizado com sucesso' });
     });
 });
 
