@@ -30,12 +30,7 @@ function adicionarMenuLateral() {
                 <button onclick="redirecionar('produto_consultar.html')">
                     <i class="fas fa-search"></i> Consultar Produto
                 </button>
-                <button onclick="redirecionar('produto_editar.html')">
-                    <i class="fas fa-edit"></i> Editar Produto
-                </button>
-                <button onclick="redirecionar('produto_visualizar.html')">
-                    <i class="fas fa-eye"></i> Visualizar Produto
-                </button>
+                
             </div>
 
             <div class="menu-section">
@@ -46,12 +41,7 @@ function adicionarMenuLateral() {
                 <button onclick="redirecionar('pedido_consultar.html')">
                     <i class="fas fa-search"></i> Consultar Pedido
                 </button>
-                <button onclick="redirecionar('pedido_editar.html')">
-                    <i class="fas fa-edit"></i> Editar Pedido
-                </button>
-                <button onclick="redirecionar('pedido_visualizar.html')">
-                    <i class="fas fa-eye"></i> Visualizar Pedido
-                </button>
+              
             </div>
 
             <div class="menu-section">
