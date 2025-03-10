@@ -9,7 +9,8 @@ CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nome_usuario VARCHAR(100) NOT NULL,
     senha_usuario VARCHAR(255) NOT NULL,
-    email_usuario VARCHAR(100) UNIQUE NOT NULL
+    email_usuario VARCHAR(100) UNIQUE NOT NULL,
+    ativo_usuario BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- Tabela de Fornecedores
@@ -59,3 +60,4 @@ INSERT INTO usuario (id_usuario, nome_usuario, senha_usuario, email_usuario) VAL
 (1, 'carlos', 'carlos123', 'carlos@gmail.com'),
 (2, 'juarez', 'juarez123', 'juarez@gmail.com'),
 (3, 'lucas', 'lucas123', 'lucas@gmail.com');
+

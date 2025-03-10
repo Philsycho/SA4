@@ -27,7 +27,7 @@
                 <input type="password" id="senha_usuario" placeholder="Senha" required>
             </div>
             <div class="botoes-container">
-                <button type="button" onclick="window.location.href='index.html'">
+                <button type="button" onclick="window.location.href='tela_inicial.html'">
                     <i class="fas fa-arrow-left"></i> Voltar
                 </button>
                 <button type="submit">
@@ -60,7 +60,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Usuário registrado com sucesso!');
-                    window.location.href = 'index.html';
+                    window.location.href = 'registro.html';
                 } else {
                     alert(data.message || 'Erro ao registrar usuário.');
                 }
