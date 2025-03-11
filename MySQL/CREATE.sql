@@ -10,7 +10,7 @@ CREATE TABLE usuario (
     nome_usuario VARCHAR(100) NOT NULL,
     senha_usuario VARCHAR(255) NOT NULL,
     email_usuario VARCHAR(100) UNIQUE NOT NULL,
-    ativo_usuario BOOLEAN NOT NULL DEFAULT TRUE
+    ativo_usuario BOOLEAN NOT NULL DEFAULT 1 -- 1 para ativo, 0 para inativo
 );
 
 -- Tabela de Fornecedores
@@ -57,7 +57,7 @@ CREATE TABLE pedido (
     FOREIGN KEY (id_fornecedor_pedido) REFERENCES fornecedor(id_fornecedor) ON DELETE CASCADE
 );
 INSERT INTO usuario (id_usuario, nome_usuario, senha_usuario, email_usuario) VALUES
-(1, 'carlos', 'carlos123', 'carlos@gmail.com'),
-(2, 'juarez', 'juarez123', 'juarez@gmail.com'),
-(3, 'lucas', 'lucas123', 'lucas@gmail.com');
+(1, 'carlos', 'carlos123', 'carlos@gmail.com', TRUE),
+(2, 'juarez', 'juarez123', 'juarez@gmail.com', TRUE),
+(3, 'lucas', 'lucas123', 'lucas@gmail.com', FALSE); -- Este usuário está inativo
 

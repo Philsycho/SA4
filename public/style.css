@@ -325,3 +325,55 @@ label {
     color: #666;
     font-size: 1.1rem;
 }
+
+/* Adicione estes estilos ao seu arquivo style.css */
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.status-badge.ativo {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-badge.inativo {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    color: #2193b0;
+}
+
+.btn-action:hover {
+    background-color: #e9ecef;
+}
+
+.detalhes-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.campo {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.campo i {
+    color: #2193b0;
+    width: 20px;
+}

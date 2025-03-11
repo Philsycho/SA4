@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Usuários</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .acoes-topo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-voltar {
+            background-color: #6c757d;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            min-width: 85px;
+        }
+
+        .btn-novo {
+            background-color: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        .acoes-botoes {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .table-container {
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-view {
+            background-color: #17a2b8;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+        }
+
+        .btn-toggle {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <h2><i class="fas fa-users"></i> Gestão de Usuários</h2>
+            
+            <div class="acoes-topo">
+                <button onclick="window.location.href='tela_inicial.html'" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="acoes-botoes">
+                    <button onclick="window.location.href='registro.html'" class="btn btn-novo">
+                        <i class="fas fa-user-plus"></i> Novo Usuário
+                    </button>
+                </div>
+            </div>
+
+            <div class="filtro-container">
+                <label for="filtroStatus">Filtrar por status:</label>
+                <select id="filtroStatus" class="filtro-status" onchange="filtrarUsuarios()">
+                    <option value="todos">Todos</option>
+                    <option value="1">Ativos</option>
+                    <option value="0">Inativos</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosTable">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        let todosUsuarios = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarUsuarios();
+        });
+
+        function carregarUsuarios() {
+            fetch('http://localhost:3000/usuarios')
+                .then(response => response.json())
+                .then(data => {
+                    todosUsuarios = data.usuarios;
+                    filtrarUsuarios();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar usuários:', error);
+                    alert('Erro ao carregar lista de usuários.');
+                });
+        }
+
+        function filtrarUsuarios() {
+            const filtro = document.getElementById('filtroStatus').value;
+            let usuariosFiltrados = todosUsuarios;
+
+            if (filtro !== 'todos') {
+                usuariosFiltrados = todosUsuarios.filter(usuario => 
+                    usuario.ativo_usuario.toString() === filtro
+                );
+            }
+
+            const tbody = document.getElementById('usuariosTable');
+            tbody.innerHTML = '';
+
+            usuariosFiltrados.forEach(usuario => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${usuario.nome_usuario}</td>
+                    <td>${usuario.email_usuario}</td>
+                    <td>
+                        <span class="status-badge ${usuario.ativo_usuario ? 'ativo' : 'inativo'}">
+                            ${usuario.ativo_usuario ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="visualizarUsuario(${usuario.id_usuario})" class="btn-action btn-view" title="Visualizar">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editarUsuario(${usuario.id_usuario})" class="btn-action btn-edit" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="alterarStatus(${usuario.id_usuario}, ${!usuario.ativo_usuario})" 
+                                class="btn-action btn-toggle" title="${usuario.ativo_usuario ? 'Desativar' : 'Ativar'}">
+                            <i class="fas fa-toggle-${usuario.ativo_usuario ? 'on' : 'off'}"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function visualizarUsuario(id) {
+            window.location.href = `usuario_visualizar.html?id=${id}`;
+        }
+
+        function editarUsuario(id) {
+            window.location.href = `usuario_editar.html?id=${id}`;
+        }
+
+        function alterarStatus(id, novoStatus) {
+            const statusNumerico = novoStatus ? 1 : 0;
+            const mensagem = `Deseja realmente ${novoStatus ? 'ativar' : 'desativar'} este usuário?`;
+            
+            if (confirm(mensagem)) {
+                fetch(`http://localhost:3000/usuario/status/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ativo_usuario: statusNumerico })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status do usuário atualizado com sucesso!');
+                        carregarUsuarios();
+                    } else {
+                        alert(data.message || 'Erro ao atualizar status do usuário.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar status do usuário.');
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

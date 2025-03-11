@@ -25,21 +25,52 @@ db.connect(err => {
     }
 });
 
-// 🟢 LOGIN
+// 🟢 LOGIN - Com verificação explícita de status ativo (1)
 app.post('/login', (req, res) => {
     const { nome_usuario, senha_usuario } = req.body;
 
-    const sql = 'SELECT * FROM usuario WHERE BINARY nome_usuario = ? AND BINARY senha_usuario = ?';
+    // Primeiro verifica se o usuário existe
+    const sql = `
+        SELECT * FROM usuario 
+        WHERE BINARY nome_usuario = ? 
+        AND BINARY senha_usuario = ?`;
+    
     db.query(sql, [nome_usuario.trim(), senha_usuario.trim()], (err, results) => {
         if (err) {
             console.error('❌ Erro no login:', err);
-            return res.status(500).json({ error: 'Erro ao processar a solicitação' });
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao processar a solicitação' 
+            });
         }
 
+        // Se não encontrou nenhum usuário
         if (results.length === 0) {
-            return res.status(401).json({ message: 'Usuário ou senha inválidos!' });
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Usuário ou senha inválidos!' 
+            });
         }
-        res.json({ success: true, message: 'Login realizado com sucesso!', usuario: results[0] });
+
+        // Verifica explicitamente se o usuário está ativo (ativo_usuario = 1)
+        if (results[0].ativo_usuario === 0) {
+            return res.status(401).json({ 
+                success: false, 
+                message: 'Acesso negado. Usuário inativo no sistema.' 
+            });
+        }
+
+        // Se chegou aqui, o usuário existe e está ativo
+        res.json({ 
+            success: true, 
+            message: 'Login realizado com sucesso!', 
+            usuario: {
+                id_usuario: results[0].id_usuario,
+                nome_usuario: results[0].nome_usuario,
+                email_usuario: results[0].email_usuario,
+                ativo_usuario: results[0].ativo_usuario
+            }
+        });
     });
 });
 
@@ -255,6 +286,164 @@ app.put('/pedido/:id', (req, res) => {
             return;
         }
         res.json({ message: 'Pedido atualizado com sucesso' });
+    });
+});
+
+// 🟢 ROTA - Listar todos os usuários
+app.get('/usuarios', (req, res) => {
+    const sql = `
+        SELECT 
+            id_usuario,
+            nome_usuario,
+            email_usuario,
+            ativo_usuario
+        FROM usuario
+        ORDER BY nome_usuario`;
+    
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('❌ Erro ao listar usuários:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao listar usuários' 
+            });
+        }
+        res.json({ 
+            success: true, 
+            usuarios: results 
+        });
+    });
+});
+
+// 🟢 ROTA - Buscar usuário específico
+app.get('/usuario/:id', (req, res) => {
+    const { id } = req.params;
+    
+    const sql = `
+        SELECT 
+            id_usuario,
+            nome_usuario,
+            email_usuario,
+            ativo_usuario
+        FROM usuario 
+        WHERE id_usuario = ?`;
+
+    db.query(sql, [id], (err, results) => {
+        if (err) {
+            console.error('❌ Erro ao buscar usuário:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao buscar usuário' 
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Usuário não encontrado' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            usuario: results[0] 
+        });
+    });
+});
+
+// 🟢 ROTA - Atualizar usuário
+app.put('/usuario/:id', (req, res) => {
+    const { id } = req.params;
+    const { nome_usuario, email_usuario, ativo_usuario } = req.body;
+
+    // Verifica se o email já existe para outro usuário
+    const checkEmailSql = `
+        SELECT id_usuario 
+        FROM usuario 
+        WHERE email_usuario = ? AND id_usuario != ?`;
+
+    db.query(checkEmailSql, [email_usuario, id], (err, results) => {
+        if (err) {
+            console.error('❌ Erro ao verificar email:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao verificar email' 
+            });
+        }
+
+        if (results.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email já está em uso por outro usuário' 
+            });
+        }
+
+        // Atualiza o usuário
+        const updateSql = `
+            UPDATE usuario 
+            SET 
+                nome_usuario = ?,
+                email_usuario = ?,
+                ativo_usuario = ?
+            WHERE id_usuario = ?`;
+
+        db.query(updateSql, [nome_usuario, email_usuario, ativo_usuario, id], (err, result) => {
+            if (err) {
+                console.error('❌ Erro ao atualizar usuário:', err);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao atualizar usuário' 
+                });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Usuário não encontrado' 
+                });
+            }
+
+            res.json({ 
+                success: true, 
+                message: 'Usuário atualizado com sucesso' 
+            });
+        });
+    });
+});
+
+// 🟢 ROTA - Atualizar status do usuário
+app.put('/usuario/status/:id', (req, res) => {
+    const { id } = req.params;
+    const { ativo_usuario } = req.body;
+
+    if (![0, 1].includes(Number(ativo_usuario))) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Status inválido. Use 0 (inativo) ou 1 (ativo)' 
+        });
+    }
+
+    const sql = "UPDATE usuario SET ativo_usuario = ? WHERE id_usuario = ?";
+    db.query(sql, [ativo_usuario, id], (err, result) => {
+        if (err) {
+            console.error('❌ Erro ao atualizar status do usuário:', err);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Erro ao atualizar status do usuário' 
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Usuário não encontrado' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            message: `Status do usuário atualizado para ${ativo_usuario === 1 ? 'ativo' : 'inativo'}` 
+        });
     });
 });
 

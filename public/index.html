@@ -44,25 +44,26 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor');
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Erro no login');
+                    });
                 }
                 return response.json();
             })
             .then(data => {
                 if (data.success) {
-                    // Armazena os dados completos do usuário no localStorage .
                     localStorage.setItem('usuario', JSON.stringify({
                         ...data.usuario,
                         logado: true
                     }));
-                    window.location.href = "tela_inicial.html"; // Redireciona para a tela inicial
+                    window.location.href = "tela_inicial.html";
                 } else {
-                    alert(data.message || "Usuário ou senha incorretos.");
+                    alert(data.message || "Erro ao fazer login.");
                 }
             })
             .catch(error => {
-                console.error('Erro ao tentar fazer login:', error);
-                alert("Erro ao tentar fazer login. Verifique se o servidor está rodando.");
+                console.error('Erro:', error);
+                alert(error.message || "Erro ao tentar fazer login. Verifique se o servidor está rodando.");
             });
         });
     </script>
