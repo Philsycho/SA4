@@ -6,74 +6,6 @@
     <title>Gestão de Usuários</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .acoes-topo {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .btn-voltar {
-            background-color: #6c757d;
-            color: white;
-            padding: 0.4rem 0.8rem;
-            font-size: 0.9rem;
-            min-width: 85px;
-        }
-
-        .btn-novo {
-            background-color: #28a745;
-            color: white;
-            padding: 0.5rem 1rem;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        .acoes-botoes {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .table-container {
-            margin-top: 1rem;
-            overflow-x: auto;
-        }
-
-        .btn-action {
-            padding: 5px 10px;
-            margin: 0 3px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-        }
-
-        .btn-view {
-            background-color: #17a2b8;
-        }
-
-        .btn-edit {
-            background-color: #ffc107;
-        }
-
-        .btn-toggle {
-            background-color: #6c757d;
-        }
-    </style>
 </head>
 <body>
     <div class="content">
@@ -118,7 +50,7 @@
         </div>
     </div>
 
-    <script src="base.js"></script>
+    <script src="util_funcoes.js"></script>
     <script>
         let todosUsuarios = [];
 
@@ -216,4 +148,4 @@
         }
     </script>
 </body>
-</html> 
+</html>

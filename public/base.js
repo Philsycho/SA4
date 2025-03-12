@@ -1,3 +1,99 @@
+// Funções utilitárias comuns para o sistema
+
+// Função para redirecionar
+function redirecionar(pagina) {
+    window.location.href = pagina;
+}
+
+// Função para formatar preço em Reais
+function formatarPreco(preco) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(preco);
+}
+
+// Função para formatar data
+function formatarData(dataString) {
+    const data = new Date(dataString);
+    return data.toLocaleString('pt-BR');
+}
+
+// Função para validar CNPJ
+function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/[^\d]/g, '');
+    
+    if (cnpj.length !== 14) return false;
+    
+    // Elimina CNPJs inválidos conhecidos
+    if (/^(\d)\1{13}$/.test(cnpj)) return false;
+    
+    // Validação do primeiro dígito verificador
+    let tamanho = cnpj.length - 2;
+    let numeros = cnpj.substring(0, tamanho);
+    let digitos = cnpj.substring(tamanho);
+    let soma = 0;
+    let pos = tamanho - 7;
+    
+    for (let i = tamanho; i >= 1; i--) {
+        soma += numeros.charAt(tamanho - i) * pos--;
+        if (pos < 2) pos = 9;
+    }
+    
+    let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    if (resultado != digitos.charAt(0)) return false;
+    
+    // Validação do segundo dígito verificador
+    tamanho = tamanho + 1;
+    numeros = cnpj.substring(0, tamanho);
+    digitos = cnpj.substring(tamanho);
+    soma = 0;
+    pos = tamanho - 7;
+    
+    for (let i = tamanho; i >= 1; i--) {
+        soma += numeros.charAt(tamanho - i) * pos--;
+        if (pos < 2) pos = 9;
+    }
+    
+    resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    if (resultado != digitos.charAt(0)) return false;
+    
+    return true;
+}
+
+// Função para aplicar máscara de CNPJ
+function mascaraCNPJ(cnpj) {
+    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+}
+
+// Função para verificar autenticação
+function verificarAutenticacao() {
+    const usuarioData = localStorage.getItem('usuario');
+    if (!usuarioData) {
+        window.location.href = 'index.html';
+        return false;
+    }
+
+    try {
+        const usuario = JSON.parse(usuarioData);
+        if (!usuario.logado) {
+            window.location.href = 'index.html';
+            return false;
+        }
+        return true;
+    } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
+// Função para fazer logout
+function fazerLogout() {
+    localStorage.clear();
+    window.location.href = 'index.html';
+}
+
 // Funções compartilhadas entre todas as páginas
 function adicionarMenuLateral() {
     // Adicionar o botão do menu
@@ -24,7 +120,7 @@ function adicionarMenuLateral() {
             
             <div class="menu-section">
                 <h3><i class="fas fa-box"></i> Produtos</h3>
-                <button onclick="redirecionar('cadastro_produto.html')">
+                <button onclick="redirecionar('produto_novo.html')">
                     <i class="fas fa-plus"></i> Cadastrar Produto
                 </button>
                 <button onclick="redirecionar('produto_consultar.html')">
@@ -59,45 +155,15 @@ function adicionarMenuLateral() {
     }
 }
 
-function verificarLogin() {
-    const usuarioData = localStorage.getItem('usuario');
-    if (!usuarioData) {
-        window.location.href = 'index.html';
-        return false;
-    }
-
-    try {
-        const usuario = JSON.parse(usuarioData);
-        if (!usuario.logado) {
-            window.location.href = 'index.html';
-            return false;
-        }
-        return usuario;
-    } catch (error) {
-        console.error('Erro ao verificar login:', error);
-        window.location.href = 'index.html';
-        return false;
-    }
-}
-
-function redirecionar(pagina) {
-    window.location.href = pagina;
-}
-
 function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
     document.querySelector('.content').classList.toggle('shifted');
 }
 
-function fazerLogout() {
-    localStorage.clear();
-    window.location.href = 'index.html';
-}
-
 // Executar quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname !== '/index.html' && window.location.pathname !== '/') {
-        const usuario = verificarLogin();
+        const usuario = verificarAutenticacao();
         if (usuario) {
             adicionarMenuLateral();
         }

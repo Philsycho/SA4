@@ -5,93 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Pedido</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="form.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .form-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 1rem;
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .icon-container {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .icon-container i {
-            color: #007bff;
-        }
-
-        .input-group input {
-            flex: 1;
-            padding: 0.5rem;
-            padding-left: 40px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-
-        .botoes-container {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-voltar, .btn-salvar {
-            min-width: 120px;
-            padding: 0.75rem 1.5rem;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-
-        .btn-voltar {
-            background-color: #6c757d;
-        }
-
-        .btn-voltar:hover {
-            background-color: #5a6268;
-        }
-
-        .btn-salvar {
-            flex: 1;
-            background-color: #007bff;
-        }
-
-        .btn-salvar:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
 <body>
     <div class="content">
@@ -143,7 +57,7 @@
         </div>
     </div>
 
-    <script src="base.js"></script>
+    <script src="util_funcoes.js"></script>
     <script>
         // Função para buscar detalhes do pedido
         function buscarDetalhesPedido() {
