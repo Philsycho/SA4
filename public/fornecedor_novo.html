@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Fornecedor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="form.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-truck"></i>
+                <h2>Novo Fornecedor</h2>
+            </div>
+            <form id="form_fornecedor" class="form-container">
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <input type="text" id="nome_fornecedor" name="nome_fornecedor" placeholder="Nome do Fornecedor" required minlength="3">
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <input type="text" id="cnpj_fornecedor" name="cnpj_fornecedor" placeholder="CNPJ" required maxlength="18">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="primary-button">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <a href="fornecedor_consultar.html" class="secondary-button">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        // Função para validar CNPJ
+        function validarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/[^\d]/g, '');
+            
+            if (cnpj.length !== 14) return false;
+            
+            // Elimina CNPJs inválidos conhecidos
+            if (/^(\d)\1{13}$/.test(cnpj)) return false;
+            
+            // Validação do primeiro dígito verificador
+            let tamanho = cnpj.length - 2;
+            let numeros = cnpj.substring(0, tamanho);
+            let digitos = cnpj.substring(tamanho);
+            let soma = 0;
+            let pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(0)) return false;
+            
+            // Validação do segundo dígito verificador
+            tamanho = tamanho + 1;
+            numeros = cnpj.substring(0, tamanho);
+            digitos = cnpj.substring(tamanho);
+            soma = 0;
+            pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(0)) return false;
+            
+            return true;
+        }
+
+        // Máscara para CNPJ
+        document.getElementById('cnpj_fornecedor').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+                value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+                value = value.replace(/(\d{4})(\d)/, "$1-$2");
+            }
+            e.target.value = value;
+        });
+
+        // Configurar o formulário
+        document.getElementById('form_fornecedor').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const cnpj = document.getElementById('cnpj_fornecedor').value;
+            if (!validarCNPJ(cnpj)) {
+                alert('CNPJ inválido! Por favor, verifique.');
+                return;
+            }
+
+            const dadosFornecedor = {
+                nome_fornecedor: document.getElementById('nome_fornecedor').value.trim(),
+                cnpj_fornecedor: cnpj
+            };
+
+            // Validação do nome
+            if (dadosFornecedor.nome_fornecedor.length < 3) {
+                alert('O nome do fornecedor deve ter pelo menos 3 caracteres!');
+                return;
+            }
+
+            fetch('http://localhost:3000/fornecedor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosFornecedor)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert('Fornecedor cadastrado com sucesso!');
+                window.location.href = 'fornecedor_consultar.html';
+            })
+            .catch(error => {
+                console.error('Erro ao cadastrar fornecedor:', error);
+                alert('Erro ao cadastrar fornecedor. Verifique se o servidor está rodando.');
+            });
+        });
+    </script>
+
+    <style>
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .icon-container {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-container i {
+            color: #007bff;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 0.5rem;
+            padding-left: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .primary-button, .secondary-button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .primary-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .secondary-button {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .primary-button:hover {
+            background-color: #0056b3;
+        }
+
+        .secondary-button:hover {
+            background-color: #5a6268;
+        }
+
+        input.error {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</body>
+</html> 

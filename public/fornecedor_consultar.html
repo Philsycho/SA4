@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Fornecedores</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <i class="fas fa-truck"></i>
+            <h2>Consulta de Fornecedores</h2>
+        </div>
+
+        <div class="actions">
+            <a href="fornecedor_novo.html" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Fornecedor
+            </a>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar fornecedor...">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>CNPJ</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="fornecedoresTable">
+                    <!-- Dados serão inseridos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Fornecedor</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="input-group">
+                    <label for="editNome">Nome:</label>
+                    <input type="text" id="editNome" required minlength="3">
+                </div>
+                <div class="input-group">
+                    <label for="editCNPJ">CNPJ:</label>
+                    <input type="text" id="editCNPJ" required maxlength="18">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Função para validar CNPJ
+        function validarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/[^\d]/g, '');
+            
+            if (cnpj.length !== 14) return false;
+            if (/^(\d)\1{13}$/.test(cnpj)) return false;
+            
+            let tamanho = cnpj.length - 2;
+            let numeros = cnpj.substring(0, tamanho);
+            let digitos = cnpj.substring(tamanho);
+            let soma = 0;
+            let pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(0)) return false;
+            
+            tamanho = tamanho + 1;
+            numeros = cnpj.substring(0, tamanho);
+            digitos = cnpj.substring(tamanho);
+            soma = 0;
+            pos = tamanho - 7;
+            
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            
+            resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+            if (resultado != digitos.charAt(0)) return false;
+            
+            return true;
+        }
+
+        // Máscara para CNPJ
+        function aplicarMascaraCNPJ(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/^(\d{2})(\d)/, "$1.$2");
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+                value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
+                value = value.replace(/(\d{4})(\d)/, "$1-$2");
+            }
+            input.value = value;
+        }
+
+        // Carregar fornecedores
+        function carregarFornecedores() {
+            fetch('http://localhost:3000/fornecedor')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tbody = document.getElementById('fornecedoresTable');
+                        tbody.innerHTML = '';
+                        
+                        data.fornecedores.forEach(fornecedor => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${fornecedor.id_fornecedor}</td>
+                                <td>${fornecedor.nome_fornecedor}</td>
+                                <td>${fornecedor.cnpj_fornecedor}</td>
+                                <td>
+                                    <button onclick="editarFornecedor(${fornecedor.id_fornecedor})" class="btn-icon">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="excluirFornecedor(${fornecedor.id_fornecedor})" class="btn-icon delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        alert('Erro ao carregar fornecedores');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao carregar fornecedores');
+                });
+        }
+
+        // Editar fornecedor
+        function editarFornecedor(id) {
+            fetch(`http://localhost:3000/fornecedor/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('editId').value = data.fornecedor.id_fornecedor;
+                        document.getElementById('editNome').value = data.fornecedor.nome_fornecedor;
+                        document.getElementById('editCNPJ').value = data.fornecedor.cnpj_fornecedor;
+                        document.getElementById('editModal').style.display = 'block';
+                    } else {
+                        alert('Erro ao carregar dados do fornecedor');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao carregar dados do fornecedor');
+                });
+        }
+
+        // Excluir fornecedor
+        function excluirFornecedor(id) {
+            if (confirm('Tem certeza que deseja excluir este fornecedor?')) {
+                fetch(`http://localhost:3000/fornecedor/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Fornecedor excluído com sucesso!');
+                        carregarFornecedores();
+                    } else {
+                        alert(data.message || 'Erro ao excluir fornecedor');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir fornecedor');
+                });
+            }
+        }
+
+        // Configurar modal
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        document.querySelector('.close').onclick = closeModal;
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('editModal')) {
+                closeModal();
+            }
+        }
+
+        // Configurar formulário de edição
+        document.getElementById('editForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const nome = document.getElementById('editNome').value.trim();
+            const cnpj = document.getElementById('editCNPJ').value;
+
+            if (nome.length < 3) {
+                alert('O nome deve ter pelo menos 3 caracteres');
+                return;
+            }
+
+            if (!validarCNPJ(cnpj)) {
+                alert('CNPJ inválido');
+                return;
+            }
+
+            fetch(`http://localhost:3000/fornecedor/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome_fornecedor: nome,
+                    cnpj_fornecedor: cnpj
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Fornecedor atualizado com sucesso!');
+                    closeModal();
+                    carregarFornecedores();
+                } else {
+                    alert(data.message || 'Erro ao atualizar fornecedor');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar fornecedor');
+            });
+        };
+
+        // Configurar máscara de CNPJ no modal
+        document.getElementById('editCNPJ').addEventListener('input', function(e) {
+            aplicarMascaraCNPJ(this);
+        });
+
+        // Configurar busca
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.getElementById('fornecedoresTable').getElementsByTagName('tr');
+            
+            Array.from(rows).forEach(row => {
+                const nome = row.cells[1].textContent.toLowerCase();
+                const cnpj = row.cells[2].textContent.toLowerCase();
+                const match = nome.includes(searchTerm) || cnpj.includes(searchTerm);
+                row.style.display = match ? '' : 'none';
+            });
+        });
+
+        // Carregar fornecedores ao iniciar
+        document.addEventListener('DOMContentLoaded', carregarFornecedores);
+    </script>
+
+    <style>
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 0 1rem;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+            margin-left: 1rem;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .search-container i {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .table-container {
+            margin: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin: 0 0.25rem;
+        }
+
+        .btn-icon:hover {
+            color: #0056b3;
+        }
+
+        .btn-icon.delete {
+            color: #dc3545;
+        }
+
+        .btn-icon.delete:hover {
+            color: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .close {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</body>
+</html> 

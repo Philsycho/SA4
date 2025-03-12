@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Produto</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-box"></i>
+                <h2>Novo Produto</h2>
+            </div>
+            <form id="produtoForm">
+                <div class="input-group">
+                    <i class="fas fa-box"></i>
+                    <input type="text" id="nome_produto" placeholder="Nome do Produto" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="number" id="preco_produto" step="0.01" placeholder="Preço" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-building"></i>
+                    <select id="id_produto_fornecedor" required>
+                        <option value="">Selecione um Fornecedor</option>
+                    </select>
+                </div>
+
+                <div class="botoes-container">
+                    <button type="submit">
+                        <i class="fas fa-save"></i> Cadastrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        // Carregar fornecedores ao iniciar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarFornecedores();
+        });
+
+        // Função para carregar fornecedores
+        function carregarFornecedores() {
+            fetch('http://localhost:3000/fornecedor')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('id_produto_fornecedor');
+                        data.fornecedores.forEach(fornecedor => {
+                            const option = document.createElement('option');
+                            option.value = fornecedor.id_fornecedor;
+                            option.textContent = `${fornecedor.nome_fornecedor} (${fornecedor.cnpj_fornecedor})`;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        alert('Erro ao carregar fornecedores');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar fornecedores:', error);
+                    alert('Erro ao carregar lista de fornecedores.');
+                });
+        }
+
+        // Enviar formulário
+        document.getElementById("produtoForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nome_produto = document.getElementById("nome_produto").value;
+            const preco_produto = document.getElementById("preco_produto").value;
+            const id_produto_fornecedor = document.getElementById("id_produto_fornecedor").value;
+
+            if (!id_produto_fornecedor) {
+                alert('Por favor, selecione um fornecedor');
+                return;
+            }
+
+            fetch("http://localhost:3000/produto", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    nome_produto, 
+                    preco_produto, 
+                    id_produto_fornecedor: parseInt(id_produto_fornecedor) 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById("produtoForm").reset();
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar produto:", error);
+                alert("Erro ao cadastrar produto.");
+            });
+        });
+    </script>
+
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .header i {
+            font-size: 2rem;
+            color: #007bff;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #007bff;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .input-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .botoes-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button i {
+            font-size: 1.1rem;
+        }
+    </style>
+</body>
+</html> 
