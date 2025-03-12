@@ -5,38 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edição de Produto</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-edit"></i>
+                <h2>Edição de Produto</h2>
+            </div>
+            <form id="editarForm">
+                <input type="hidden" id="id_produto">
+                
+                <div class="input-group">
+                    <i class="fas fa-box"></i>
+                    <input type="text" id="nome_produto" placeholder="Nome do Produto" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="number" id="preco_produto" step="0.01" placeholder="Preço do Produto" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-building"></i>
+                    <input type="number" id="id_produto_fornecedor" placeholder="ID do Fornecedor" required>
+                </div>
+                
+                <div class="botoes-container">
+                    <button type="submit">
+                        <i class="fas fa-save"></i> Atualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
     <script>
         // Função para buscar os detalhes do produto e preencher o formulário
         function buscarDetalhesProduto() {
             const urlParams = new URLSearchParams(window.location.search);
             const idProduto = urlParams.get('id');
-
-            // Simulação de busca no banco de dados
-            if (idProduto === "1") {
-                document.getElementById('id_produto').value = "1";
-                document.getElementById('nome_produto').value = "Produto Exemplo";
-                document.getElementById('preco_produto').value = "100";
-                document.getElementById('id_produto_fornecedor').value = "1";
-            } else {
-                alert("Produto não encontrado");
+            
+            if (!idProduto) {
+                alert("ID do produto não especificado");
+                window.location.href = 'produto_consultar.html';
+                return;
             }
+
+            fetch(`http://localhost:3000/produto/${idProduto}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Produto não encontrado');
+                    }
+                    return response.json();
+                })
+                .then(produto => {
+                    document.getElementById('id_produto').value = produto.id_produto;
+                    document.getElementById('nome_produto').value = produto.nome_produto;
+                    document.getElementById('preco_produto').value = produto.preco_produto;
+                    document.getElementById('id_produto_fornecedor').value = produto.id_produto_fornecedor;
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar detalhes do produto:', error);
+                    alert("Erro ao buscar detalhes do produto");
+                    window.location.href = 'produto_consultar.html';
+                });
         }
 
         // Carregar os detalhes do produto ao carregar a página
         window.onload = buscarDetalhesProduto;
+
+        // Adicionar evento de submit ao formulário
+        document.getElementById('editarForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const idProduto = document.getElementById('id_produto').value;
+            const nome_produto = document.getElementById('nome_produto').value;
+            const preco_produto = document.getElementById('preco_produto').value;
+            const id_produto_fornecedor = document.getElementById('id_produto_fornecedor').value;
+
+            fetch(`http://localhost:3000/produto/${idProduto}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome_produto,
+                    preco_produto,
+                    id_produto_fornecedor
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar produto');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(data.message || "Produto atualizado com sucesso!");
+                window.location.href = 'produto_visualizar.html?id=' + idProduto;
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar produto:', error);
+                alert('Erro ao atualizar produto');
+            });
+        });
     </script>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Edição de Produto</h2>
-        <form>
-            <input type="hidden" id="id_produto">
-            <input type="text" id="nome_produto" placeholder="Nome do Produto" required>
-            <input type="number" id="preco_produto" placeholder="Preço do Produto" required>
-            <input type="number" id="id_produto_fornecedor" placeholder="ID do Fornecedor" required>
-            <button type="submit">Atualizar</button>
-            <button type="button" onclick="window.history.back()">Cancelar</button>
-        </form>
-    </div>
 </body>
 </html>

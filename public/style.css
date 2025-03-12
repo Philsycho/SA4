@@ -1,167 +1,411 @@
+/* ==================== Estilos Globais ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
+    padding: 20px;
+}
+
+/* ==================== Containers ==================== */
+.login-container, .container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 800px;
 }
 
 .login-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
 }
 
-.login-container h2 {
-    margin-bottom: 20px;
+/* ==================== Cabeçalhos ==================== */
+.login-header, .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
 }
 
-.login-container input {
-    width: calc(100% - 22px); /* Ajuste para considerar o padding */
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box; /* Garante que o padding seja considerado na largura */
+.login-header i, .header i {
+    font-size: 3rem;
+    color: #2193b0;
+    margin-bottom: 1rem;
 }
 
-.login-container button {
-    width: calc(100% - 22px); /* Ajuste para considerar o padding */
-    padding: 10px;
-    background-color: #007bff;
+.login-header h2, .header h2 {
+    font-size: 1.8rem;
+    color: #333;
+}
+
+/* ==================== Formulários ==================== */
+.form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+    max-width: 800px;
+    width: 100%;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+.input-group:focus-within {
+    border-color: #2193b0;
+}
+
+.icon-container {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+}
+
+.icon-container i {
+    color: #2193b0;
+    width: 16px;
+    text-align: center;
+}
+
+.input-group input,
+.input-group select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
     border: none;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    box-sizing: border-box; /* Garante que o padding seja considerado na largura */
+    outline: none;
+    font-size: 1rem;
+    background: transparent;
 }
 
-.login-container button:hover {
+.input-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+/* ==================== Botões ==================== */
+.botoes-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+button {
+    background: #2193b0;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+button:hover {
+    background: #1b7a8d;
+    transform: translateY(-2px);
+}
+
+button[type="button"] {
+    background: #6c757d;
+}
+
+button[type="button"]:hover {
+    background: #5a6268;
+}
+
+button[type="submit"] {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #2193b0;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
     background-color: #0056b3;
 }
 
-.welcome-container {
-    max-width: 600px;
-    margin: 100px auto;
-    padding: 20px;
-    text-align: center;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.welcome-container h1 {
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.welcome-container p {
-    color: #666;
-    font-size: 1.1em;
-}
-
-#countdown {
-    font-weight: bold;
-    color: #007bff;
-}
-
-/* Navbar */
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: #007bff;
-    padding: 10px 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1000;
+.btn-voltar, .btn-salvar, .btn-editar {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
     display: flex;
-    justify-content: space-between; /* Alinha os elementos nas extremidades */
     align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
 }
 
-.navbar-content {
+.btn-voltar {
+    background-color: #6c757d;
+}
+
+.btn-voltar:hover {
+    background-color: #5a6268;
+}
+
+.btn-salvar, .btn-editar {
+    background-color: #2193b0;
+}
+
+.btn-salvar:hover, .btn-editar:hover {
+    background-color: #0056b3;
+}
+
+/* ==================== Menu Lateral ==================== */
+.sidebar {
+    position: fixed;
+    left: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.sidebar.active {
+    left: 0;
+}
+
+.sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    margin-bottom: 2rem;
 }
 
-.page-title {
-    color: #fff;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-right: auto; /* Empurra o título para a esquerda */
+.menu-section {
+    margin-bottom: 2rem;
 }
 
-.user-info {
+.menu-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 0.5rem;
 }
 
-.user-info span {
-    color: #fff;
-    font-weight: bold;
-}
-
-.user-info button {
-    background-color: #dc3545;
-    color: #fff;
+.menu-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: white;
     border: none;
-    padding: 5px 15px;
-    border-radius: 4px;
+    padding: 0.8rem;
+    border-radius: 50%;
     cursor: pointer;
-    transition: background-color 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
 }
 
-.user-info button:hover {
-    background-color: #c82333;
+.menu-toggle i {
+    font-size: 1.5rem;
+    color: #2193b0;
 }
 
-/* Ajuste no container das páginas para considerar a navbar */
-.dashboard-container,
-.consultar-container {
-    margin-top: 80px; /* Espaço para a navbar */
+/* ==================== Tabelas ==================== */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
 }
 
-.consultar-container {
-    padding: 20px;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.lista-usuarios {
-    margin-top: 20px;
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e1e1e1;
 }
 
-.usuario-item {
-    background-color: #fff;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+th {
+    background: #2193b0;
+    color: white;
+    font-weight: 600;
 }
 
-.usuario-item p {
-    margin: 5px 0;
+tr:hover {
+    background: #f8f9fa;
 }
 
-.usuario-item button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
+/* ==================== Status e Badges ==================== */
+.status-badge {
     padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
 }
 
-.usuario-item button:hover {
-    background-color: #0056b3;
+.status-badge.ativo {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-badge.inativo {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.badge-success {
+    background-color: #28a745;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+/* ==================== Ações e Botões de Ação ==================== */
+.acoes-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.acoes-botoes {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-view {
+    background-color: #17a2b8;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+}
+
+.btn-toggle {
+    background-color: #6c757d;
+}
+
+/* ==================== Detalhes e Campos ==================== */
+.detalhes-container, .detalhes-pedido {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.campo {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+}
+
+.campo i {
+    color: #2193b0;
+    width: 20px;
+}
+
+.campo span:first-of-type {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* ==================== Responsividade ==================== */
+@media (max-width: 768px) {
+    .login-container, .container {
+        padding: 1.5rem;
+    }
+
+    .botoes-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        left: -100%;
+    }
+
+    .content.shifted {
+        margin-left: 0;
+    }
+}
+
+/* ==================== Validação de Formulários ==================== */
+input.error {
+    border-color: #dc3545;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }

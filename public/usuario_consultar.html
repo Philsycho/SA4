@@ -3,79 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar Usuários - SA4</title>
+    <title>Gestão de Usuários</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <h2><i class="fas fa-users"></i> Gestão de Usuários</h2>
+            
+            <div class="acoes-topo">
+                <button onclick="window.location.href='tela_inicial.html'" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="acoes-botoes">
+                    <button onclick="window.location.href='registro.html'" class="btn btn-novo">
+                        <i class="fas fa-user-plus"></i> Novo Usuário
+                    </button>
+                </div>
+            </div>
+
+            <div class="filtro-container">
+                <label for="filtroStatus">Filtrar por status:</label>
+                <select id="filtroStatus" class="filtro-status" onchange="filtrarUsuarios()">
+                    <option value="todos">Todos</option>
+                    <option value="1">Ativos</option>
+                    <option value="0">Inativos</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosTable">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="util_funcoes.js"></script>
     <script>
-        // Função para buscar e exibir os usuários
-        async function exibirUsuarios() {
-            try {
-                const response = await fetch('http://localhost:3000/usuarios');
-                const usuarios = await response.json();
+        let todosUsuarios = [];
 
-                const listaUsuarios = document.getElementById('lista_usuarios');
-                listaUsuarios.innerHTML = ''; // Limpa a lista
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarUsuarios();
+        });
 
-                usuarios.forEach(usuario => {
-                    const usuarioItem = document.createElement('div');
-                    usuarioItem.className = 'usuario-item';
-                    usuarioItem.innerHTML = `
-                        <p>ID: ${usuario.id_usuario}</p>
-                        <p>Nome: ${usuario.nome_usuario}</p>
-                        <p>Email: ${usuario.email_usuario}</p>
-                        <button onclick="editarUsuario(${usuario.id_usuario})">Editar</button>
-                    `;
-                    listaUsuarios.appendChild(usuarioItem);
+        function carregarUsuarios() {
+            fetch('http://localhost:3000/usuarios')
+                .then(response => response.json())
+                .then(data => {
+                    todosUsuarios = data.usuarios;
+                    filtrarUsuarios();
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar usuários:', error);
+                    alert('Erro ao carregar lista de usuários.');
                 });
-            } catch (error) {
-                console.error('Erro ao buscar usuários:', error);
-                alert('Erro ao carregar a lista de usuários');
-            }
         }
 
-        // Função para redirecionar para a página de edição
+        function filtrarUsuarios() {
+            const filtro = document.getElementById('filtroStatus').value;
+            let usuariosFiltrados = todosUsuarios;
+
+            if (filtro !== 'todos') {
+                usuariosFiltrados = todosUsuarios.filter(usuario => 
+                    usuario.ativo_usuario.toString() === filtro
+                );
+            }
+
+            const tbody = document.getElementById('usuariosTable');
+            tbody.innerHTML = '';
+
+            usuariosFiltrados.forEach(usuario => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${usuario.nome_usuario}</td>
+                    <td>${usuario.email_usuario}</td>
+                    <td>
+                        <span class="status-badge ${usuario.ativo_usuario ? 'ativo' : 'inativo'}">
+                            ${usuario.ativo_usuario ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="visualizarUsuario(${usuario.id_usuario})" class="btn-action btn-view" title="Visualizar">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editarUsuario(${usuario.id_usuario})" class="btn-action btn-edit" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="alterarStatus(${usuario.id_usuario}, ${!usuario.ativo_usuario})" 
+                                class="btn-action btn-toggle" title="${usuario.ativo_usuario ? 'Desativar' : 'Ativar'}">
+                            <i class="fas fa-toggle-${usuario.ativo_usuario ? 'on' : 'off'}"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function visualizarUsuario(id) {
+            window.location.href = `usuario_visualizar.html?id=${id}`;
+        }
+
         function editarUsuario(id) {
             window.location.href = `usuario_editar.html?id=${id}`;
         }
 
-        // Carrega os usuários ao abrir a página
-        window.onload = exibirUsuarios;
-    </script>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <span class="page-title">Consultar Usuários</span>
-        <div class="user-info">
-            <span>Bem-vindo, <span id="username"></span></span>
-            <button onclick="logout()">Sair</button>
-        </div>
-    </nav>
-
-    <div class="consultar-container">
-        <h2>Consultar Usuários</h2>
-        <div id="lista_usuarios" class="lista-usuarios">
-            <!-- Lista de usuários será exibida aqui -->
-        </div>
-        <div class="menu">
-            <button onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
-        </div>
-    </div>
-
-    <script>
-        // Verifica se o usuário está logado
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            // Exibe o nome do usuário na navbar
-            document.getElementById('username').textContent = user.nome_usuario;
-        }
-
-        // Função de logout
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
+        function alterarStatus(id, novoStatus) {
+            const statusNumerico = novoStatus ? 1 : 0;
+            const mensagem = `Deseja realmente ${novoStatus ? 'ativar' : 'desativar'} este usuário?`;
+            
+            if (confirm(mensagem)) {
+                fetch(`http://localhost:3000/usuario/status/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ativo_usuario: statusNumerico })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Status do usuário atualizado com sucesso!');
+                        carregarUsuarios();
+                    } else {
+                        alert(data.message || 'Erro ao atualizar status do usuário.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar status do usuário.');
+                });
+            }
         }
     </script>
 </body>
-</html> 
+</html>

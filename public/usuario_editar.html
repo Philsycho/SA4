@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuário</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <h2><i class="fas fa-user-edit"></i> Editar Usuário</h2>
+            <form id="editarUsuarioForm">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="nome_usuario" placeholder="Nome de Usuário" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email_usuario" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-toggle-on"></i>
+                    <select id="ativo_usuario" required>
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
+                    </select>
+                </div>
+                <div class="botoes-container">
+                    <button type="button" onclick="window.location.href='usuario_consultar.html'" class="btn-voltar">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                    <button type="submit" class="btn-salvar">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        let usuarioId;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            usuarioId = urlParams.get('id');
+            if (usuarioId) {
+                carregarUsuario(usuarioId);
+            }
+        });
+
+        function carregarUsuario(id) {
+            fetch(`http://localhost:3000/usuario/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('nome_usuario').value = data.usuario.nome_usuario;
+                    document.getElementById('email_usuario').value = data.usuario.email_usuario;
+                    document.getElementById('ativo_usuario').value = data.usuario.ativo_usuario ? "1" : "0";
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar usuário:', error);
+                    alert('Erro ao carregar dados do usuário.');
+                });
+        }
+
+        document.getElementById('editarUsuarioForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const dadosAtualizados = {
+                nome_usuario: document.getElementById('nome_usuario').value,
+                email_usuario: document.getElementById('email_usuario').value,
+                ativo_usuario: document.getElementById('ativo_usuario').value === "1" ? 1 : 0
+            };
+
+            fetch(`http://localhost:3000/usuario/${usuarioId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosAtualizados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Usuário atualizado com sucesso!');
+                    window.location.href = 'usuario_consultar.html';
+                } else {
+                    alert(data.message || 'Erro ao atualizar usuário.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar usuário:', error);
+                alert('Erro ao atualizar usuário.');
+            });
+        });
+    </script>
+</body>
+</html> 

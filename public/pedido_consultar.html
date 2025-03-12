@@ -3,42 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consultar Pedidos - SA4</title>
+    <title>Consulta de Pedidos</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <span class="page-title">Consultar Pedidos</span>
-        <div class="user-info">
-            <span>Bem-vindo, <span id="username"></span></span>
-            <button onclick="logout()">Sair</button>
-        </div>
-    </nav>
-
-    <div class="consultar-container">
-        <h2>Consultar Pedidos</h2>
-        <!-- Conteúdo específico da página de consulta de pedidos -->
-        <div class="menu">
-            <button onclick="window.location.href='dashboard.html'">Voltar ao Dashboard</button>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Consulta de Pedidos</h2>
+            </div>
+            <div class="botoes-container">
+                <button onclick="novoPedido()">
+                    <i class="fas fa-plus"></i> Novo Pedido
+                </button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço</th>
+                            <th>Fornecedor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista_pedidos">
+                        <!-- Lista de pedidos será exibida aqui -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <script src="base.js"></script>
     <script>
-        // Verifica se o usuário está logado
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            // Exibe o nome do usuário na navbar
-            document.getElementById('username').textContent = user.nome_usuario;
+        // Função para formatar preço em Reais
+        function formatarPreco(preco) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(preco);
         }
 
-        // Função de logout
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
+        // Função para exibir lista de pedidos
+        function exibirPedidos() {
+            fetch('http://localhost:3000/pedido')
+                .then(response => response.json())
+                .then(pedidos => {
+                    const listaPedidos = document.getElementById('lista_pedidos');
+                    listaPedidos.innerHTML = ''; // Limpa a lista
+
+                    pedidos.forEach(pedido => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${pedido.id_pedido}</td>
+                            <td>${pedido.id_usuario_pedido}</td>
+                            <td>${pedido.id_produto_pedido}</td>
+                            <td>${pedido.quantidade_produto}</td>
+                            <td>${formatarPreco(pedido.preco_produto_pedido)}</td>
+                            <td>${pedido.id_fornecedor_pedido}</td>
+                            <td>
+                                <div class="botoes-container">
+                                    <button onclick="visualizarPedido(${pedido.id_pedido})">
+                                        <i class="fas fa-eye"></i> Visualizar
+                                    </button>
+                                    <button onclick="editarPedido(${pedido.id_pedido})">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        listaPedidos.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar pedidos:', error);
+                    alert('Erro ao carregar pedidos. Verifique se o servidor está rodando.');
+                });
         }
+
+        // Função para redirecionar para a página de visualização
+        function visualizarPedido(id) {
+            window.location.href = `pedido_visualizar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de edição
+        function editarPedido(id) {
+            window.location.href = `pedido_editar.html?id=${id}`;
+        }
+
+        // Função para redirecionar para a página de novo pedido
+        function novoPedido() {
+            window.location.href = 'pedido_novo.html';
+        }
+
+        // Carregar pedidos ao carregar a página
+        window.onload = exibirPedidos;
     </script>
 </body>
 </html>

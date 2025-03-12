@@ -5,18 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novo Pedido</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2>Novo Pedido</h2>
-        <form>
-            <input type="text" id="usuario_pedido" placeholder="Usuário" required>
-            <input type="text" id="produto_pedido" placeholder="Produto" required>
-            <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
-            <input type="number" id="preco_pedido" placeholder="Preço" required>
-            <button type="submit">Registrar</button>
-            <button type="button" onclick="window.history.back()">Cancelar</button>
-        </form>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-plus"></i>
+                <h2>Novo Pedido</h2>
+            </div>
+            <form id="form_pedido" class="form-container">
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="number" id="id_usuario" name="id_usuario" placeholder="ID do Usuário" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <input type="number" id="id_produto" name="id_produto" placeholder="ID do Produto" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-sort-amount-up"></i>
+                    </div>
+                    <input type="number" id="quantidade" name="quantidade" placeholder="Quantidade" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <input type="number" id="preco" name="preco" step="0.01" placeholder="Preço" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <input type="number" id="id_fornecedor" name="id_fornecedor" placeholder="ID do Fornecedor" required>
+                </div>
+                <button type="submit">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </form>
+        </div>
     </div>
+
+    <script src="util_funcoes.js"></script>
+    <script>
+        // Configurar o formulário
+        document.getElementById('form_pedido').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const dadosPedido = {
+                id_usuario_pedido: document.getElementById('id_usuario').value,
+                id_produto_pedido: document.getElementById('id_produto').value,
+                quantidade_produto: document.getElementById('quantidade').value,
+                preco_produto_pedido: document.getElementById('preco').value,
+                id_fornecedor_pedido: document.getElementById('id_fornecedor').value
+            };
+
+            fetch('http://localhost:3000/pedido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosPedido)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert('Pedido criado com sucesso!');
+                window.location.href = 'pedido_consultar.html';
+            })
+            .catch(error => {
+                console.error('Erro ao criar pedido:', error);
+                alert('Erro ao criar pedido. Verifique se o servidor está rodando.');
+            });
+        });
+    </script>
 </body>
 </html>
