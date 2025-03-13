@@ -99,6 +99,12 @@
                 return;
             }
 
+            // Validar espaços no nome de usuário
+            if (nome_usuario.includes(' ')) {
+                alert('O nome de usuário não pode conter espaços');
+                return;
+            }
+
             // Validar formato do email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email_usuario)) {
@@ -133,7 +139,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Usuário registrado com sucesso!');
-                    window.location.href = 'index.html';
+                    window.location.href = 'usuario_consultar.html';
                 } else {
                     alert(data.message || 'Erro ao registrar usuário.');
                 }
@@ -142,6 +148,16 @@
                 console.error('Erro ao registrar usuário:', error);
                 alert('Erro ao tentar registrar usuário.');
             });
+        });
+
+        // Adicionar validação em tempo real para espaços no nome de usuário
+        document.getElementById('nome_usuario').addEventListener('input', function(e) {
+            if (this.value.includes(' ')) {
+                this.setCustomValidity('O nome de usuário não pode conter espaços');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
         });
     </script>
 </body>
