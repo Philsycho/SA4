@@ -6,7 +6,8 @@
 --id_usuario\
 --nome_usuario\
 --senha_usuario\
---email_usuario
+--email_usuario\
+--ativo_usuario\
 
 -produto\
 --id_produto\

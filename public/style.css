@@ -1,4 +1,4 @@
-/* Estilos Globais */
+/* ==================== Estilos Globais ==================== */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +15,7 @@ body {
     padding: 20px;
 }
 
-/* Container Principal */
+/* ==================== Containers ==================== */
 .login-container, .container {
     background: rgba(255, 255, 255, 0.95);
     padding: 2rem;
@@ -29,7 +29,7 @@ body {
     max-width: 400px;
 }
 
-/* Cabeçalho */
+/* ==================== Cabeçalhos ==================== */
 .login-header, .header {
     text-align: center;
     margin-bottom: 2rem;
@@ -47,37 +47,66 @@ body {
     color: #333;
 }
 
-/* Grupos de Input */
-.input-group {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-
-.input-group i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #2193b0;
-    font-size: 1.2rem;
-}
-
-.input-group input, .input-group select {
+/* ==================== Formulários ==================== */
+.form-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+    max-width: 800px;
     width: 100%;
-    padding: 12px 40px;
-    border: 2px solid #e1e1e1;
-    border-radius: 25px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
 }
 
-.input-group input:focus, .input-group select:focus {
-    outline: none;
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+    position: relative;
+}
+
+.input-group:focus-within {
     border-color: #2193b0;
-    box-shadow: 0 0 0 3px rgba(33, 147, 176, 0.1);
 }
 
-/* Botões */
+.icon-container {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+}
+
+.icon-container i {
+    color: #2193b0;
+    width: 16px;
+    text-align: center;
+}
+
+.input-group input,
+.input-group select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background: transparent;
+}
+
+.input-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+
+/* ==================== Botões ==================== */
 .botoes-container {
     display: flex;
     gap: 1rem;
@@ -106,10 +135,6 @@ button:hover {
     transform: translateY(-2px);
 }
 
-button i {
-    font-size: 1.1rem;
-}
-
 button[type="button"] {
     background: #6c757d;
 }
@@ -118,27 +143,59 @@ button[type="button"]:hover {
     background: #5a6268;
 }
 
-/* Listas de Itens */
-.lista-produtos, .lista-pedidos {
-    margin-top: 2rem;
-    max-height: 500px;
-    overflow-y: auto;
+button[type="submit"] {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #2193b0;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
 }
 
-.produto-item, .pedido-item {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+button[type="submit"]:hover {
+    background-color: #0056b3;
 }
 
-.produto-item p, .pedido-item p {
-    margin: 0.5rem 0;
-    color: #333;
+.btn-voltar, .btn-salvar, .btn-editar {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
 }
 
-/* Menu Lateral */
+.btn-voltar {
+    background-color: #6c757d;
+}
+
+.btn-voltar:hover {
+    background-color: #5a6268;
+}
+
+.btn-salvar, .btn-editar {
+    background-color: #2193b0;
+}
+
+.btn-salvar:hover, .btn-editar:hover {
+    background-color: #0056b3;
+}
+
+/* ==================== Menu Lateral ==================== */
 .sidebar {
     position: fixed;
     left: -300px;
@@ -164,15 +221,6 @@ button[type="button"]:hover {
     margin-bottom: 2rem;
 }
 
-.close-btn {
-    background: none;
-    border: none;
-    color: #333;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
 .menu-section {
     margin-bottom: 2rem;
 }
@@ -183,13 +231,6 @@ button[type="button"]:hover {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.menu-section button {
-    width: 100%;
-    text-align: left;
-    justify-content: flex-start;
-    margin-bottom: 0.5rem;
 }
 
 .menu-toggle {
@@ -210,41 +251,12 @@ button[type="button"]:hover {
     color: #2193b0;
 }
 
-/* Conteúdo Principal */
-.content {
-    margin-left: 0;
-    padding: 2rem;
-    transition: margin-left 0.3s ease;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+/* ==================== Tabelas ==================== */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
 }
 
-.content.shifted {
-    margin-left: 300px;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .login-container, .container {
-        padding: 1.5rem;
-    }
-
-    .botoes-container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        left: -100%;
-    }
-
-    .content.shifted {
-        margin-left: 0;
-    }
-}
-
-/* Tabelas */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -270,58 +282,130 @@ tr:hover {
     background: #f8f9fa;
 }
 
-/* Mensagens de Alerta */
-.alert {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Logout Button */
-.logout-button {
-    background: #dc3545;
-    width: 100%;
-}
-
-.logout-button:hover {
-    background: #c82333;
-}
-
-/* Form Labels */
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #333;
+/* ==================== Status e Badges ==================== */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
     font-weight: 500;
 }
 
-/* Tela Inicial */
-.welcome-container {
-    text-align: center;
+.status-badge.ativo {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-badge.inativo {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.badge-success {
+    background-color: #28a745;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+/* ==================== Ações e Botões de Ação ==================== */
+.acoes-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.acoes-botoes {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-view {
+    background-color: #17a2b8;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+}
+
+.btn-toggle {
+    background-color: #6c757d;
+}
+
+/* ==================== Detalhes e Campos ==================== */
+.detalhes-container, .detalhes-pedido {
+    background-color: white;
     padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.welcome-container h1 {
-    color: #2193b0;
+.campo {
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
 }
 
-.welcome-container p {
-    color: #666;
-    font-size: 1.1rem;
+.campo i {
+    color: #2193b0;
+    width: 20px;
+}
+
+.campo span:first-of-type {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* ==================== Responsividade ==================== */
+@media (max-width: 768px) {
+    .login-container, .container {
+        padding: 1.5rem;
+    }
+
+    .botoes-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        left: -100%;
+    }
+
+    .content.shifted {
+        margin-left: 0;
+    }
+}
+
+/* ==================== Validação de Formulários ==================== */
+input.error {
+    border-color: #dc3545;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }

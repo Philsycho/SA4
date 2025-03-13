@@ -6,6 +6,27 @@
     <title>Tela Inicial</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .user-info {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            color: #333;
+        }
+
+        .user-info i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #4a90e2;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="menu-toggle" onclick="toggleMenu()">
@@ -19,20 +40,29 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
+
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <p id="userNameDisplay">Carregando...</p>
+        </div>
         
         <div class="menu-section">
             <h3><i class="fas fa-box"></i> Produtos</h3>
-            <button onclick="redirecionar('cadastro_produto.html')">
-                <i class="fas fa-plus"></i> Cadastrar Produto
+            <button onclick="redirecionar('produto_novo.html')">
+                <i class="fas fa-plus"></i> Novo Produto
             </button>
             <button onclick="redirecionar('produto_consultar.html')">
                 <i class="fas fa-search"></i> Consultar Produto
             </button>
-            <button onclick="redirecionar('produto_editar.html')">
-                <i class="fas fa-edit"></i> Editar Produto
+        </div>
+
+        <div class="menu-section">
+            <h3><i class="fas fa-truck"></i> Fornecedores</h3>
+            <button onclick="redirecionar('fornecedor_novo.html')">
+                <i class="fas fa-plus"></i> Novo Fornecedor
             </button>
-            <button onclick="redirecionar('produto_visualizar.html')">
-                <i class="fas fa-eye"></i> Visualizar Produto
+            <button onclick="redirecionar('fornecedor_consultar.html')">
+                <i class="fas fa-search"></i> Consultar Fornecedor
             </button>
         </div>
 
@@ -44,18 +74,12 @@
             <button onclick="redirecionar('pedido_consultar.html')">
                 <i class="fas fa-search"></i> Consultar Pedido
             </button>
-            <button onclick="redirecionar('pedido_editar.html')">
-                <i class="fas fa-edit"></i> Editar Pedido
-            </button>
-            <button onclick="redirecionar('pedido_visualizar.html')">
-                <i class="fas fa-eye"></i> Visualizar Pedido
-            </button>
         </div>
 
         <div class="menu-section">
             <h3><i class="fas fa-user"></i> Usuários</h3>
-            <button onclick="redirecionar('registro.html')">
-                <i class="fas fa-user-plus"></i> Registrar Usuário
+            <button onclick="redirecionar('usuario_consultar.html')">
+                <i class="fas fa-user-plus"></i> Consultar Usuário
             </button>
         </div>
 
@@ -68,7 +92,7 @@
 
     <div class="content">
         <div class="welcome-container">
-            <h1><i class="fas fa-home"></i> Bem-vindo ao Sistema</h1>
+            <h1><i class="fas fa-home"></i> Bem-vindo ao CJL Tech</h1>
             <p id="welcome-message">Selecione uma opção no menu lateral para começar</p>
         </div>
     </div>
@@ -102,6 +126,10 @@
                     window.location.href = 'index.html';
                     return;
                 }
+
+                // Atualizar nome do usuário no menu lateral
+                const userNameDisplay = document.getElementById('userNameDisplay');
+                userNameDisplay.textContent = usuario.nome_usuario;
 
                 // Personalizar mensagem de boas-vindas
                 const welcomeMessage = document.getElementById('welcome-message');

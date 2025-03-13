@@ -6,73 +6,6 @@
     <title>Visualizar Pedido</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .detalhes-pedido {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 1rem;
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .campo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .campo i {
-            margin-right: 1rem;
-            width: 20px;
-            color: #007bff;
-        }
-
-        .campo span:first-of-type {
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
-
-        .botoes-container {
-            margin-top: 2rem;
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-        }
-
-        .btn-voltar, .btn-editar {
-            min-width: 120px;
-            padding: 0.75rem 1.5rem;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: background-color 0.2s;
-        }
-
-        .btn-voltar {
-            background-color: #6c757d;
-        }
-
-        .btn-voltar:hover {
-            background-color: #5a6268;
-        }
-
-        .btn-editar {
-            background-color: #007bff;
-        }
-
-        .btn-editar:hover {
-            background-color: #0056b3;
-        }
-    </style>
 </head>
 <body>
     <div class="content">
@@ -124,7 +57,7 @@
         </div>
     </div>
 
-    <script src="base.js"></script>
+    <script src="util_funcoes.js"></script>
     <script>
         // Função para formatar preço em Reais
         function formatarPreco(preco) {

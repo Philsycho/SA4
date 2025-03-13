@@ -27,7 +27,9 @@
 
                 <div class="input-group">
                     <i class="fas fa-building"></i>
-                    <input type="number" id="id_produto_fornecedor" placeholder="ID do Fornecedor" required>
+                    <select id="id_produto_fornecedor" required>
+                        <option value="">Selecione um Fornecedor</option>
+                    </select>
                 </div>
 
                 <div class="botoes-container">
@@ -39,8 +41,37 @@
         </div>
     </div>
 
-    <script src="base.js"></script>
+    <script src="util_funcoes.js"></script>
     <script>
+        // Carregar fornecedores ao iniciar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarFornecedores();
+        });
+
+        // Função para carregar fornecedores
+        function carregarFornecedores() {
+            fetch('http://localhost:3000/fornecedor')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('id_produto_fornecedor');
+                        data.fornecedores.forEach(fornecedor => {
+                            const option = document.createElement('option');
+                            option.value = fornecedor.id_fornecedor;
+                            option.textContent = `${fornecedor.nome_fornecedor} (${fornecedor.cnpj_fornecedor})`;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        alert('Erro ao carregar fornecedores');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar fornecedores:', error);
+                    alert('Erro ao carregar lista de fornecedores.');
+                });
+        }
+
+        // Enviar formulário
         document.getElementById("produtoForm").addEventListener("submit", function(event) {
             event.preventDefault();
 
@@ -48,12 +79,21 @@
             const preco_produto = document.getElementById("preco_produto").value;
             const id_produto_fornecedor = document.getElementById("id_produto_fornecedor").value;
 
+            if (!id_produto_fornecedor) {
+                alert('Por favor, selecione um fornecedor');
+                return;
+            }
+
             fetch("http://localhost:3000/produto", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ nome_produto, preco_produto, id_produto_fornecedor })
+                body: JSON.stringify({ 
+                    nome_produto, 
+                    preco_produto, 
+                    id_produto_fornecedor: parseInt(id_produto_fornecedor) 
+                })
             })
             .then(response => response.json())
             .then(data => {

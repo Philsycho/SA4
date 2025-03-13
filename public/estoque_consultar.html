@@ -32,6 +32,9 @@
                     </tbody>
                 </table>
             </div>
+            <button onclick="redirecionar('produto_novo.html')">
+                <i class="fas fa-plus"></i> Novo Produto
+            </button>
         </div>
     </div>
 
@@ -80,30 +83,5 @@
         // Carregar movimentações ao carregar a página
         window.onload = exibirEstoque;
     </script>
-
-    <style>
-        .table-container {
-            overflow-x: auto;
-            margin-top: 1rem;
-        }
-
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .badge-success {
-            background-color: #28a745;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-        }
-    </style>
 </body>
 </html> 

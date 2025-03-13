@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar Usuário</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <h2><i class="fas fa-user"></i> Detalhes do Usuário</h2>
+            <div class="detalhes-container" id="detalhesUsuario">
+                <!-- Preenchido via JavaScript -->
+            </div>
+            <div class="botoes-container">
+                <button onclick="window.location.href='usuario_consultar.html'" class="btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button onclick="editarUsuario()" class="btn-editar">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="base.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                carregarUsuario(id);
+            }
+        });
+
+        function carregarUsuario(id) {
+            fetch(`http://localhost:3000/usuario/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('detalhesUsuario');
+                    container.innerHTML = `
+                        <div class="campo">
+                            <i class="fas fa-user"></i>
+                            <span>Nome: ${data.usuario.nome_usuario}</span>
+                        </div>
+                        <div class="campo">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email: ${data.usuario.email_usuario}</span>
+                        </div>
+                        <div class="campo">
+                            <i class="fas fa-toggle-on"></i>
+                            <span>Status: ${data.usuario.ativo_usuario ? 'Ativo' : 'Inativo'}</span>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar usuário:', error);
+                    alert('Erro ao carregar detalhes do usuário.');
+                });
+        }
+
+        function editarUsuario() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            window.location.href = `usuario_editar.html?id=${id}`;
+        }
+    </script>
+</body>
+</html> 
