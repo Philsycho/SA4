@@ -72,7 +72,9 @@ node server/api.js
 
 ## Banco de dados
 ![MER -] (https://github.com/Philsycho/SA4/blob/Juarez/Apresentacao/SA4.png)
-![MER -] (Apresentacao\SA4.png)
+![Texto de teste] (Apresentacao/SA4.png)
+![Texto alternativo](caminho/da/imagem.png)
+
 
 ## Suporte
 Para questões e suporte, por favor abra uma issue no repositório do projeto.
