@@ -46,8 +46,8 @@ node server/api.js
 1. Abra o navegador
 2. Acesse `http://localhost:3000`
 3. Use as credenciais iniciais para login:
-   - Usuário: carlos
-   - Senha: carlos123
+   - Usuário: adm
+   - Senha: 123456
 
 ## Páginas Principais
 - **index.html**: Página de login
@@ -70,45 +70,9 @@ node server/api.js
 - Proteção contra SQL Injection
 - Controle de acesso baseado em status do usuário
 
+## Banco de dados
+![MER -] (https://github.com/Philsycho/SA4/blob/Juarez/Apresentacao/SA4.png)
+![MER -] (Apresentacao\SA4.png)
+
 ## Suporte
 Para questões e suporte, por favor abra uma issue no repositório do projeto.
-
-# SA4
- 
-## Banco de dados
-
--usuario\
---id_usuario\
---nome_usuario\
---senha_usuario\
---email_usuario\
---ativo_usuario\
-
--produto\
---id_produto\
---nome_produto\
---preco_produto\
---id_produto_fornecedor
-
--fornecedor\
---id_fornecedor\
---nome_fornecedor\
---cnpj_fornecedor
-
--estoque\
---id_movimento\
---id_tipo_movimento\
---id_produto_estoque\
---id_fornecedor_estoque\
---quantidade_movimentado\
---id_usuario_estoque\
---id_pedido_estoque\
---data_movimento
-
--pedido\
---id_usuario_pedido\
---id_produto_pedido\
---quantidade_produto\
---preco_produto_pedido\
---id_fornecedor_pedido
-
