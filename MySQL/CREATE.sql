@@ -56,8 +56,5 @@ CREATE TABLE pedido (
     FOREIGN KEY (id_produto_pedido) REFERENCES produto(id_produto) ON DELETE CASCADE,
     FOREIGN KEY (id_fornecedor_pedido) REFERENCES fornecedor(id_fornecedor) ON DELETE CASCADE
 );
-INSERT INTO usuario (id_usuario, nome_usuario, senha_usuario, email_usuario) VALUES
-(1, 'carlos', 'carlos123', 'carlos@gmail.com', TRUE),
-(2, 'juarez', 'juarez123', 'juarez@gmail.com', TRUE),
-(3, 'lucas', 'lucas123', 'lucas@gmail.com', FALSE); -- Este usuário está inativo
-
+INSERT INTO usuario (id_usuario, nome_usuario, senha_usuario, email_usuario, ativo_usuario ) VALUES
+(1, 'adm', '@Dm2503', 'adm@CJL.com', 1);
