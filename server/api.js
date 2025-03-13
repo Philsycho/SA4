@@ -633,38 +633,68 @@ app.post('/pedido', (req, res) => {
     const { 
         id_usuario_pedido, 
         id_produto_pedido, 
-        quantidade_produto, 
-        preco_produto_pedido, 
-        id_fornecedor_pedido 
+        quantidade_produto,
+        preco_produto
     } = req.body;
 
-    const sql = `
-        INSERT INTO pedido (
-            id_usuario_pedido, 
-            id_produto_pedido, 
-            quantidade_produto, 
-            preco_produto_pedido, 
-            id_fornecedor_pedido
-        ) VALUES (?, ?, ?, ?, ?)`;
+    console.log('Dados recebidos:', req.body);
 
-    db.query(sql, [
-        id_usuario_pedido, 
-        id_produto_pedido, 
-        quantidade_produto, 
-        preco_produto_pedido, 
-        id_fornecedor_pedido
-    ], (err, result) => {
+    // Verificar produto e fornecedor
+    const sqlProduto = `
+        SELECT p.*, f.id_fornecedor
+        FROM produto p
+        JOIN fornecedor f ON p.id_produto_fornecedor = f.id_fornecedor
+        WHERE p.id_produto = ?`;
+
+    db.query(sqlProduto, [id_produto_pedido], (err, resultsProduto) => {
         if (err) {
-            console.error('❌ Erro ao cadastrar pedido:', err);
+            console.error('❌ Erro ao verificar produto:', err);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Erro ao cadastrar pedido' 
+                message: 'Erro ao verificar produto' 
             });
         }
-        res.status(201).json({ 
-            success: true, 
-            message: '✅ Pedido cadastrado com sucesso!', 
-            id: result.insertId 
+
+        if (resultsProduto.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Produto não encontrado' 
+            });
+        }
+
+        const produto = resultsProduto[0];
+        const id_fornecedor = produto.id_fornecedor;
+
+        // Inserir pedido
+        const sqlPedido = `
+            INSERT INTO pedido (
+                id_usuario_pedido,
+                id_produto_pedido,
+                quantidade_produto,
+                preco_produto_pedido,
+                id_fornecedor_pedido
+            ) VALUES (?, ?, ?, ?, ?)`;
+
+        db.query(sqlPedido, [
+            id_usuario_pedido,
+            id_produto_pedido,
+            quantidade_produto,
+            produto.preco_produto,
+            id_fornecedor
+        ], (err, resultPedido) => {
+            if (err) {
+                console.error('❌ Erro ao cadastrar pedido:', err);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao cadastrar pedido' 
+                });
+            }
+
+            res.status(201).json({ 
+                success: true, 
+                message: '✅ Pedido cadastrado com sucesso!', 
+                id: resultPedido.insertId 
+            });
         });
     });
 });

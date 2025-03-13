@@ -6,6 +6,27 @@
     <title>Tela Inicial</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .user-info {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            color: #333;
+        }
+
+        .user-info i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #4a90e2;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="menu-toggle" onclick="toggleMenu()">
@@ -18,6 +39,11 @@
             <button class="close-btn" onclick="toggleMenu()">
                 <i class="fas fa-times"></i>
             </button>
+        </div>
+
+        <div class="user-info">
+            <i class="fas fa-user-circle"></i>
+            <p id="userNameDisplay">Carregando...</p>
         </div>
         
         <div class="menu-section">
@@ -100,6 +126,10 @@
                     window.location.href = 'index.html';
                     return;
                 }
+
+                // Atualizar nome do usuário no menu lateral
+                const userNameDisplay = document.getElementById('userNameDisplay');
+                userNameDisplay.textContent = usuario.nome_usuario;
 
                 // Personalizar mensagem de boas-vindas
                 const welcomeMessage = document.getElementById('welcome-message');
