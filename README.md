@@ -70,10 +70,12 @@ node server/api.js
 - Proteção contra SQL Injection
 - Controle de acesso baseado em status do usuário
 
+---
 ## Banco de dados
-![MER -] (https://github.com/Philsycho/SA4/blob/Juarez/Apresentacao/SA4.png)
-![Texto de teste] (Apresentacao/SA4.png)
-![Texto alternativo](caminho/da/imagem.png)
+Como já citado o SGBDs utilizado é MySQL, para a execução na comunicação com o banco de dados é necessário a execução do `DB.js`, para manter a conexão .
+
+![Teste](Apresentacao/SA4.png)
+
 
 
 ## Suporte
