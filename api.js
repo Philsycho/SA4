@@ -8,7 +8,9 @@ const app = express();
 const SALT_ROUNDS = 10; // Número de rounds para o salt do bcrypt
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+    origin: '*' // Permite todas as origens (NÃO RECOMENDADO PARA PRODUÇÃO)
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 

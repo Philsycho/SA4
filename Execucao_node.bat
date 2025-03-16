@@ -91,7 +91,7 @@ if not "!UPGRADE_LIST!"=="" (
 :: 7. Baixar o arquivo api.js do GitHub
 echo.
 echo Baixando api.js do GitHub...
-set "API_JS_URL=https://raw.githubusercontent.com/Philsycho/SA4/8e14a6863cb698983d7cd437c8322f963bbe5555/server/api.js"
+set "API_JS_URL=https://github.com/Philsycho/SA4/blob/d496e14bd937b2ab0e59935595c5b0547fa851b1/server/api.js
 set "API_JS_DEST=%userpath%\api.js"
 powershell -Command "(New-Object System.Net.WebClient).DownloadFile('%API_JS_URL%', '%API_JS_DEST%')"
 if exist "%API_JS_DEST%" (
@@ -100,49 +100,6 @@ if exist "%API_JS_DEST%" (
 ) else (
     echo [ERRO] Falha ao baixar api.js do GitHub. Verifique a URL e a conexao. >> "%LOGFILE%"
     echo [ERRO] Falha ao baixar api.js do GitHub. Verifique o log para detalhes.
-    goto :menu_principal
-)
-
-:: 8. Criar o arquivo executar_api.bat
-echo.
-echo Criando executar_api.bat...
-set "EXECUTAR_API_BAT_DEST=%userpath%\executar_api.bat"
-(
-echo @echo off
-echo setlocal
-echo.
-echo :: Define o caminho para a pasta CJLsoft
-echo set "userpath=%%USERPROFILE%%\CJLsoft"
-echo set "api_js_path=%%userpath%%\api.js"
-echo.
-echo :: Navega para a pasta do usuário
-echo cd /d "%%userpath%%"
-echo.
-echo :: Verifica se o arquivo api.js existe
-echo if not exist "%%api_js_path%%" (
-echo     echo [ERRO] Arquivo api.js nao encontrado em: %%userpath%%
-echo     echo Certifique-se de que o arquivo api.js foi instalado corretamente.
-echo     pause
-echo     exit /b 1
-echo )
-echo.
-echo echo Iniciando api.js...
-echo node api.js
-echo if %%errorlevel%% neq 0 (
-echo     echo [ERRO] api.js retornou com erro. Verifique o log do servidor para mais detalhes.
-echo     pause
-echo     exit /b %%errorlevel%%
-echo )
-echo.
-echo echo api.js executado com sucesso!
-echo exit /b 0
-) > "%EXECUTAR_API_BAT_DEST%"
-if exist "%EXECUTAR_API_BAT_DEST%" (
-    echo [8] executar_api.bat criado e salvo em: %EXECUTAR_API_BAT_DEST% >> "%LOGFILE%"
-    echo [8] executar_api.bat criado com sucesso!
-) else (
-    echo [ERRO] Falha ao criar executar_api.bat. Verifique as permissoes de escrita na pasta. >> "%LOGFILE%"
-    echo [ERRO] Falha ao criar executar_api.bat. Verifique o log para detalhes.
     goto :menu_principal
 )
 
@@ -158,15 +115,51 @@ echo.
 echo Executando Servidor...
 echo Executando Servidor... >> "%LOGFILE%"
 
-if not exist "%executar_api_bat_path%" (
-    echo [ERRO] Arquivo executar_api.bat nao encontrado em: %userpath%
+:: Navega para a pasta do usuário
+cd /d "%userpath%"
+
+:: Verifica se o arquivo api.js existe
+if not exist "%api_js_path%" (
+    echo [ERRO] Arquivo api.js nao encontrado em: %userpath%
     echo Execute a opcao "1 - Instalacao/Atualizacao do Servidor" primeiro.
     pause
     goto :menu_principal
 )
 
-call "%executar_api_bat_path%"
+:executar_api_loop
+echo.
+echo Iniciando api.js em segundo plano...
+start /B node api.js
+echo.
+echo Servidor executando em segundo plano.
+echo Para interromper e ver as opcoes, pressione Ctrl+C nesta janela...
+pause > nul
+
+:menu_ctrl_c_options
+cls
+echo ==========================================
+echo         Servidor Interrompido
+echo ==========================================
+echo.
+echo Escolha uma opcao:
+echo.
+echo   1 - Reiniciar Servidor (em segundo plano)
+echo   2 - Sair da Aplicacao
+echo.
+echo ==========================================
+choice /c:12 /n /m "Digite o numero da opcao desejada: "
+if errorlevel 2 goto :encerrar_aplicacao
+if errorlevel 1 goto :reiniciar_servidor
 goto :menu_principal
+
+
+:reiniciar_servidor
+echo.
+echo Reiniciando o servidor...
+echo Interrompendo o servidor atual...
+taskkill /F /IM node.exe > nul 2>&1
+echo Iniciando novo servidor em segundo plano...
+goto :executar_api_loop
 
 
 :encerrar_aplicacao
@@ -178,8 +171,9 @@ echo ==========================================
 echo          Aplicacao Encerrada
 echo ==========================================
 echo.
-timeout /t 2
+echo [LOG] Antes do comando EXIT >> "%LOGFILE%"
 exit /b
+echo [LOG] Depois do comando EXIT - Isto NAO deve aparecer no log >> "%LOGFILE%"
 
 
 :: Função para verificar a biblioteca e versão instalada
