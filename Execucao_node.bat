@@ -2,17 +2,52 @@
 setlocal enabledelayedexpansion
 
 :: Criar log
-set "LOGFILE=%USERPROFILE%\CJLsoft\install_log.txt"
-echo Iniciando instalacao... > "%LOGFILE%"
+set "LOGFILE=%USERPROFILE%\CJLsoft\execucao_log.txt"
+echo Iniciando script Execucao_node.bat... > "%LOGFILE%"
+
+:: Define o caminho para a pasta CJLsoft
+set "userpath=%USERPROFILE%\CJLsoft"
+set "api_js_path=%userpath%\api.js"
+set "executar_api_bat_path=%userpath%\executar_api.bat"
+
+:menu_principal
+cls
+echo ==========================================
+echo               Menu Principal
+echo ==========================================
+echo.
+echo Escolha uma opcao:
+echo.
+echo   1 - Instalacao/Atualizacao do Servidor
+echo   2 - Execucao do Servidor
+echo   3 - Encerrar Aplicacao
+echo.
+echo ==========================================
+set /p "opcao=Digite o numero da opcao desejada: "
+
+echo Opcao escolhida: !opcao! >> "%LOGFILE%"
+
+if "!opcao!"=="1" goto :instalar_atualizar
+if "!opcao!"=="2" goto :executar_servidor
+if "!opcao!"=="3" goto :encerrar_aplicacao
+
+echo Opcao invalida. Por favor, escolha 1, 2 ou 3.
+echo.
+pause
+goto :menu_principal
+
+:instalar_atualizar
+echo.
+echo Iniciando Instalacao/Atualizacao do Servidor...
+echo Iniciando Instalacao/Atualizacao do Servidor... >> "%LOGFILE%"
 
 :: 1. Criar a pasta no diretório do usuário atual
-set "userpath=%USERPROFILE%\CJLsoft"
 if not exist "%userpath%" mkdir "%userpath%"
 echo [1] Pasta criada ou já existente: %userpath% >> "%LOGFILE%"
 
-:: 2. Direcionar a instalação das bibliotecas para a pasta criada
+:: 2. Direcionar para a pasta criada
 cd /d "%userpath%"
-echo [2] Diretório de instalação definido: %userpath% >> "%LOGFILE%"
+echo [2] Diretório de trabalho definido: %userpath% >> "%LOGFILE%"
 
 :: 3. Validar se o Node.js está instalado
 where node >nul 2>nul
@@ -20,7 +55,7 @@ if %errorlevel% neq 0 (
     echo [ERRO] Node.js nao encontrado. Instale manualmente. >> "%LOGFILE%"
     echo Node.js não encontrado. Baixe e instale manualmente: https://nodejs.org/
     pause
-    exit /b
+    goto :menu_principal
 )
 echo [3] Node.js encontrado. >> "%LOGFILE%"
 
@@ -46,7 +81,7 @@ for %%L in (%LIBS%) do (
 
 :: 5. Instalar ou atualizar as bibliotecas necessárias
 if not "!UPGRADE_LIST!"=="" (
-    echo Instalando/atualizando: !UPGRADE_LIST!
+    echo Instalando/atualizando bibliotecas: !UPGRADE_LIST!
     call npm install !UPGRADE_LIST! >> "%LOGFILE%" 2>&1
     echo [5] Bibliotecas instaladas/atualizadas: !UPGRADE_LIST! >> "%LOGFILE%"
 ) else (
@@ -65,6 +100,7 @@ if exist "%API_JS_DEST%" (
 ) else (
     echo [ERRO] Falha ao baixar api.js do GitHub. Verifique a URL e a conexao. >> "%LOGFILE%"
     echo [ERRO] Falha ao baixar api.js do GitHub. Verifique o log para detalhes.
+    goto :menu_principal
 )
 
 :: 8. Criar o arquivo executar_api.bat
@@ -107,21 +143,44 @@ if exist "%EXECUTAR_API_BAT_DEST%" (
 ) else (
     echo [ERRO] Falha ao criar executar_api.bat. Verifique as permissoes de escrita na pasta. >> "%LOGFILE%"
     echo [ERRO] Falha ao criar executar_api.bat. Verifique o log para detalhes.
+    goto :menu_principal
 )
 
-:: 6. Mensagem de conclusão
 echo.
-echo ===============================
-echo  Instalacao concluida!
-echo ===============================
+echo Instalacao/Atualizacao do Servidor Concluida!
+echo.
+pause
+goto :menu_principal
 
-:: Capturar data e hora e registrar no log
-for /f "delims=" %%I in ('powershell -Command "Get-Date -Format 'dd/MM/yyyy HH:mm:ss'"') do set DATE_LOG=%%I
-set "DATE_LOG=%datetime:~6,2%/%datetime:~4,2%/%datetime:~0,4% %datetime:~8,2%:%datetime:~10,2%:%datetime:~12,2%"
 
-echo [9] Instalacao concluida em %DATE_LOG% >> "%LOGFILE%"
-timeout /t 5 >nul
+:executar_servidor
+echo.
+echo Executando Servidor...
+echo Executando Servidor... >> "%LOGFILE%"
+
+if not exist "%executar_api_bat_path%" (
+    echo [ERRO] Arquivo executar_api.bat nao encontrado em: %userpath%
+    echo Execute a opcao "1 - Instalacao/Atualizacao do Servidor" primeiro.
+    pause
+    goto :menu_principal
+)
+
+call "%executar_api_bat_path%"
+goto :menu_principal
+
+
+:encerrar_aplicacao
+echo.
+echo Encerrando Aplicacao...
+echo Encerrando Aplicacao... >> "%LOGFILE%"
+echo.
+echo ==========================================
+echo          Aplicacao Encerrada
+echo ==========================================
+echo.
+timeout /t 2
 exit /b
+
 
 :: Função para verificar a biblioteca e versão instalada
 :CHECK_LIB
@@ -148,4 +207,4 @@ if "!CUR_VER!" LSS "!NEW_VER!" (
     echo %LIB_NAME% está atualizado (!CUR_VER!)
     echo [INFO] %LIB_NAME% atualizado (!CUR_VER!) >> "%LOGFILE%"
     set "STATUS_REPORT=!STATUS_REPORT![%LIB_NAME%] -> OK (versao !CUR_VER!)" & exit /b
-)
+) 

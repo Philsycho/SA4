@@ -1,0 +1,12 @@
+---
+description: Apenas os arquivos HTML
+globs: 
+alwaysApply: false
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
+
+[index.html](mdc:public/index.html), [dashboard.html](mdc:public/dashboard.html), [estoque_consultar.html](mdc:public/estoque_consultar.html), [fornecedor_consultar.html](mdc:public/fornecedor_consultar.html), [fornecedor_novo.html](mdc:public/fornecedor_novo.html), [pedido_consultar.html](mdc:public/pedido_consultar.html), [pedido_editar.html](mdc:public/pedido_editar.html), [pedido_novo.html](mdc:public/pedido_novo.html), [pedido_visualizar.html](mdc:public/pedido_visualizar.html), [produto_cadastro.html](mdc:public/produto_cadastro.html), [produto_consultar.html](mdc:public/produto_consultar.html), [produto_editar.html](mdc:public/produto_editar.html), [produto_novo.html](mdc:public/produto_novo.html), [produto_visualizar.html](mdc:public/produto_visualizar.html), [registro.html](mdc:public/registro.html), [usuario_consultar.html](mdc:public/usuario_consultar.html), [usuario_editar.html](mdc:public/usuario_editar.html) [usuario_registro.html](mdc:public/usuario_registro.html) [usuario_visualizar.html](mdc:public/usuario_visualizar.html) [welcome.html](mdc:public/welcome.html)
