@@ -3,6 +3,16 @@
 ## Descrição
 Este é um sistema web para gestão de pedidos, produtos, fornecedores e estoque, desenvolvido com HTML, CSS, JavaScript e Node.js, utilizando MySQL como banco de dados.
 
+## Diagrama de Relacionamento
+![Diagrama de Relacionamento](diagrama.png)
+
+O diagrama acima mostra as seguintes relações:
+- Usuário (1:N) → Pedido
+- Produto (M:N) → Pedido
+- Fornecedor (1:N) → Produto
+- Produto (1:N) → Estoque
+- Fornecedor (1:N) → Estoque
+
 ## Funcionalidades Principais
 - Sistema de login e autenticação de usuários
 - Gestão de usuários (cadastro, edição, ativação/desativação)
@@ -21,32 +31,50 @@ O sistema utiliza as seguintes tabelas:
 
 ## Requisitos
 - Node.js
-- MySQL
+- MySQL (opcional, o sistema pode configurar um banco de dados automaticamente)
 - Navegador web moderno
 
 ## Como Instalar e Executar
 
-### 1. Configuração do Banco de Dados
-1. Acesse o MySQL
-2. Execute o script `MySQL/CREATE.sql` para criar o banco de dados e as tabelas
+### Usando o Utilitário de Configuração
 
-### 2. Configuração do Servidor
-1. Navegue até a pasta do projeto
-2. Instale as dependências:
+Para simplificar a instalação e execução do sistema, foi desenvolvido um utilitário que permite:
+
+1. **Iniciar o utilitário**:
 ```bash
-npm install express mysql2 cors
-```
-3. Configure as credenciais do banco de dados no arquivo `server/api.js`
-4. Inicie o servidor:
-```bash
-node server/api.js
+node setup.js
 ```
 
-### 3. Acessando o Sistema
+2. **Menu de opções**:
+   - **Instalar/Atualizar o servidor**: Baixa a versão mais recente do servidor e instala dependências
+   - **Executar o servidor**: Inicia o servidor API
+   - **Configurar banco de dados**: Configura o banco de dados MySQL sem precisar do XAMPP
+   - **Sair**: Encerra o utilitário
+
+### Instalação Manual
+
+Se preferir instalar manualmente:
+
+1. **Configuração do Banco de Dados**
+   ```bash
+   mysql -u root -p < MySQL/CREATE.sql
+   ```
+
+2. **Instalação de Dependências**
+   ```bash
+   npm install express mysql2 cors
+   ```
+
+3. **Iniciar o Servidor**
+   ```bash
+   node server/api.js
+   ```
+
+## Acessando o Sistema
 1. Abra o navegador
 2. Acesse `http://localhost:3000`
 3. Use as credenciais iniciais para login:
-   - Usuário: adm
+   - Usuário: admin
    - Senha: 123456
 
 ## Páginas Principais
