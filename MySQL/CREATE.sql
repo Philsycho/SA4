@@ -57,6 +57,7 @@ CREATE TABLE estoque (
 CREATE TABLE pedido (
     id_pedido INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario_pedido INT NOT NULL,
+    nome_usuario VARCHAR(100) NOT NULL,
     id_produto_pedido INT NOT NULL,
     quantidade_produto INT NOT NULL,
     preco_produto_pedido DECIMAL(10,2) NOT NULL,
@@ -111,13 +112,13 @@ INSERT INTO estoque (id_tipo_movimento, id_produto_estoque, id_fornecedor_estoqu
 ('entrada', 12, 5, 10, 1);
 
 -- Inserir alguns pedidos de exemplo
-INSERT INTO pedido (id_usuario_pedido, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido) VALUES
-(1, 1, 1, 3599.99, 1),
-(1, 2, 2, 259.98, 1),
-(2, 4, 1, 899.99, 2),
-(2, 5, 1, 199.99, 2),
-(3, 7, 2, 599.98, 3),
-(3, 8, 2, 499.98, 3);
+INSERT INTO pedido (id_usuario_pedido, nome_usuario, id_produto_pedido, quantidade_produto, preco_produto_pedido, id_fornecedor_pedido) VALUES
+(1, 'admin', 1, 1, 3599.99, 1),
+(1, 'admin', 2, 2, 259.98, 1),
+(2, 'joao', 4, 1, 899.99, 2),
+(2, 'joao', 5, 1, 199.99, 2),
+(3, 'maria', 7, 2, 599.98, 3),
+(3, 'maria', 8, 2, 499.98, 3);
 
 -- Registrar saídas no estoque para os pedidos
 INSERT INTO estoque (id_tipo_movimento, id_produto_estoque, id_fornecedor_estoque, quantidade_movimentado, id_usuario_estoque, id_pedido_estoque) VALUES

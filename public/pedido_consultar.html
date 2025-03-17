@@ -86,7 +86,7 @@
                     
                     tr.innerHTML = `
                         <td>${pedido.id_pedido}</td>
-                        <td>${pedido.nome_usuario || pedido.id_usuario_pedido}</td>
+                        <td>${pedido.nome_usuario}</td>
                         <td>${pedido.nome_produto || pedido.id_produto_pedido}</td>
                         <td>${pedido.quantidade_produto}</td>
                         <td>${formatarPreco(precoTotal)}</td>

@@ -158,6 +158,7 @@
             try {
                 console.log('Enviando pedido:', {
                     id_usuario_pedido: usuarioLogado.id_usuario,
+                    nome_usuario: usuarioLogado.nome_usuario,
                     id_produto_pedido: parseInt(productSelect.value),
                     quantidade_produto: quantidade,
                     preco_produto: produtoSelecionado.preco_produto
@@ -170,6 +171,7 @@
                     },
                     body: JSON.stringify({
                         id_usuario_pedido: usuarioLogado.id_usuario,
+                        nome_usuario: usuarioLogado.nome_usuario,
                         id_produto_pedido: parseInt(productSelect.value),
                         quantidade_produto: quantidade,
                         preco_produto: produtoSelecionado.preco_produto
