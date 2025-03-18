@@ -1,15 +1,17 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use(cors());
+app.use(express.static('public'));
 
 // Configuração do banco de dados
-const db = mysql.createConnection({
+const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
@@ -17,223 +19,235 @@ const db = mysql.createConnection({
 });
 
 // Conectar ao banco de dados
-db.connect(err => {
+connection.connect((err) => {
     if (err) {
         console.error('❌ Erro ao conectar ao banco de dados:', err);
-    } else {
-        console.log('✅ Conectado ao banco de dados.');
+        return;
     }
+    console.log('✅ Conectado ao banco de dados MySQL');
 });
 
 // ==================== ROTAS DE USUÁRIO ====================
 
 // Login de usuário
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { nome_usuario, senha_usuario } = req.body;
 
-    const sql = `
-        SELECT * FROM usuario 
-        WHERE BINARY nome_usuario = ? 
-        AND BINARY senha_usuario = ?`;
-    
-    db.query(sql, [nome_usuario.trim(), senha_usuario.trim()], (err, results) => {
-        if (err) {
-            console.error('❌ Erro no login:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao processar a solicitação' 
-            });
-        }
+    try {
+        connection.query(
+            'SELECT * FROM usuario WHERE nome_usuario = ?',
+            [nome_usuario],
+            async (error, results) => {
+                if (error) {
+                    console.error('Erro na consulta:', error);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Erro ao realizar login'
+                    });
+                }
 
-        if (results.length === 0) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Usuário ou senha inválidos!' 
-            });
-        }
+                if (results.length === 0) {
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Usuário não encontrado'
+                    });
+                }
 
-        if (results[0].ativo_usuario === 0) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Acesso negado. Usuário inativo no sistema.' 
-            });
-        }
+                const usuario = results[0];
 
-        res.json({ 
-            success: true, 
-            message: 'Login realizado com sucesso!', 
-            usuario: {
-                id_usuario: results[0].id_usuario,
-                nome_usuario: results[0].nome_usuario,
-                email_usuario: results[0].email_usuario,
-                ativo_usuario: results[0].ativo_usuario
+                // Verificar se o usuário está ativo
+                if (!usuario.ativo_usuario) {
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Usuário inativo'
+                    });
+                }
+
+                // Verificar a senha
+                const senhaValida = await bcrypt.compare(senha_usuario, usuario.senha_usuario);
+                if (!senhaValida) {
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Senha incorreta'
+                    });
+                }
+
+                // Remover a senha do objeto de resposta
+                delete usuario.senha_usuario;
+
+                res.json({
+                    success: true,
+                    message: 'Login realizado com sucesso',
+                    usuario: {
+                        ...usuario,
+                        id_nivel_usuario: usuario.id_nivel_usuario
+                    }
+                });
             }
+        );
+    } catch (error) {
+        console.error('Erro ao processar login:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
         });
-    });
+    }
 });
 
 // Listar todos os usuários
 app.get('/usuarios', (req, res) => {
-    const sql = `
-        SELECT 
-            id_usuario,
-            nome_usuario,
-            email_usuario,
-            ativo_usuario
-        FROM usuario
-        ORDER BY nome_usuario`;
-    
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao listar usuários:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao listar usuários' 
-            });
+    connection.query(
+        'SELECT id_usuario, nome_usuario, email_usuario, ativo_usuario FROM usuario',
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar usuários:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao buscar usuários' 
+                });
+            }
+            res.json({ success: true, usuarios: results });
         }
-        res.json({ 
-            success: true, 
-            usuarios: results 
-        });
-    });
+    );
 });
 
 // Buscar usuário por ID
 app.get('/usuario/:id', (req, res) => {
-    const { id } = req.params;
-    
-    const sql = `
-        SELECT 
-            id_usuario,
-            nome_usuario,
-            email_usuario,
-            ativo_usuario
-        FROM usuario 
-        WHERE id_usuario = ?`;
-
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao buscar usuário:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao buscar usuário' 
-            });
-        }
-
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Usuário não encontrado' 
-            });
-        }
-
-        res.json({ 
-            success: true, 
-            usuario: results[0] 
-        });
-    });
-});
-
-// Cadastrar novo usuário
-app.post('/usuario', (req, res) => {
-    const { nome_usuario, email_usuario, senha_usuario } = req.body;
-
-    const checkSql = "SELECT * FROM usuario WHERE nome_usuario = ? OR email_usuario = ?";
-    db.query(checkSql, [nome_usuario, email_usuario], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao verificar usuário:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar usuário' 
-            });
-        }
-
-        if (results.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Usuário ou email já cadastrado!' 
-            });
-        }
-
-        const insertSql = "INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario) VALUES (?, ?, ?)";
-        db.query(insertSql, [nome_usuario, email_usuario, senha_usuario], (err, result) => {
-            if (err) {
-                console.error('❌ Erro ao cadastrar usuário:', err);
+    const id = req.params.id;
+    connection.query(
+        'SELECT id_usuario, nome_usuario, email_usuario, ativo_usuario FROM usuario WHERE id_usuario = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar usuário:', error);
                 return res.status(500).json({ 
                     success: false, 
-                    message: 'Erro ao cadastrar usuário' 
+                    message: 'Erro ao buscar usuário' 
                 });
             }
-            res.status(201).json({ 
-                success: true, 
-                message: '✅ Usuário cadastrado com sucesso!', 
-                id: result.insertId 
-            });
-        });
-    });
-});
-
-// Atualizar usuário
-app.put('/usuario/:id', (req, res) => {
-    const { id } = req.params;
-    const { nome_usuario, email_usuario, ativo_usuario } = req.body;
-
-    const checkEmailSql = `
-        SELECT id_usuario 
-        FROM usuario 
-        WHERE email_usuario = ? AND id_usuario != ?`;
-
-    db.query(checkEmailSql, [email_usuario, id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao verificar email:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar email' 
-            });
-        }
-
-        if (results.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Email já está em uso por outro usuário' 
-            });
-        }
-
-        const updateSql = `
-            UPDATE usuario 
-            SET 
-                nome_usuario = ?,
-                email_usuario = ?,
-                ativo_usuario = ?
-            WHERE id_usuario = ?`;
-
-        db.query(updateSql, [nome_usuario, email_usuario, ativo_usuario, id], (err, result) => {
-            if (err) {
-                console.error('❌ Erro ao atualizar usuário:', err);
-                return res.status(500).json({ 
-                    success: false, 
-                    message: 'Erro ao atualizar usuário' 
-                });
-            }
-
-            if (result.affectedRows === 0) {
+            if (results.length === 0) {
                 return res.status(404).json({ 
                     success: false, 
                     message: 'Usuário não encontrado' 
                 });
             }
+            res.json({ success: true, usuario: results[0] });
+        }
+    );
+});
 
-            res.json({ 
-                success: true, 
-                message: '✅ Usuário atualizado com sucesso!' 
-            });
+// Rota para cadastrar novo usuário
+app.post('/usuario', async (req, res) => {
+    const { nome_usuario, email_usuario, senha_usuario, id_nivel_usuario } = req.body;
+
+    console.log('Dados recebidos:', { nome_usuario, email_usuario, id_nivel_usuario });
+
+    // Validar dados recebidos
+    if (!nome_usuario || !email_usuario || !senha_usuario || !id_nivel_usuario) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Todos os campos são obrigatórios' 
         });
-    });
+    }
+
+    try {
+        // Verificar se usuário já existe
+        const checkUser = await new Promise((resolve, reject) => {
+            connection.query(
+                'SELECT * FROM usuario WHERE nome_usuario = ? OR email_usuario = ?',
+                [nome_usuario, email_usuario],
+                (error, results) => {
+                    if (error) reject(error);
+                    else resolve(results);
+                }
+            );
+        });
+
+        if (checkUser.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Usuário ou email já cadastrado'
+            });
+        }
+
+        // Criptografar a senha
+        const salt = await bcrypt.genSalt(10);
+        const senha_hash = await bcrypt.hash(senha_usuario, salt);
+
+        // Mapear o nível do usuário para o ENUM correto
+        let nivel_usuario;
+        switch(parseInt(id_nivel_usuario)) {
+            case 1:
+                nivel_usuario = 'admin';
+                break;
+            case 2:
+                nivel_usuario = 'usuario_produto';
+                break;
+            case 3:
+                nivel_usuario = 'usuario_pedido';
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Nível de usuário inválido'
+                });
+        }
+
+        console.log('Nível mapeado:', nivel_usuario);
+
+        // Inserir novo usuário
+        connection.query(
+            'INSERT INTO usuario (nome_usuario, email_usuario, senha_usuario, id_nivel_usuario, ativo_usuario) VALUES (?, ?, ?, ?, 1)',
+            [nome_usuario, email_usuario, senha_hash, id_nivel_usuario],
+            (error, results) => {
+                if (error) {
+                    console.error('Erro ao cadastrar usuário:', error);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Erro ao cadastrar usuário: ' + error.message
+                    });
+                }
+
+                res.json({
+                    success: true,
+                    message: 'Usuário cadastrado com sucesso',
+                    id_usuario: results.insertId
+                });
+            }
+        );
+    } catch (error) {
+        console.error('Erro ao processar cadastro:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor: ' + error.message
+        });
+    }
+});
+
+// Atualizar usuário
+app.put('/usuario/:id', (req, res) => {
+    const id = req.params.id;
+    const { nome_usuario, email_usuario, ativo_usuario } = req.body;
+
+    connection.query(
+        'UPDATE usuario SET nome_usuario = ?, email_usuario = ?, ativo_usuario = ? WHERE id_usuario = ?',
+        [nome_usuario, email_usuario, ativo_usuario, id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao atualizar usuário:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao atualizar usuário' 
+                });
+            }
+            res.json({ success: true, message: 'Usuário atualizado com sucesso' });
+        }
+    );
 });
 
 // Atualizar status do usuário
 app.put('/usuario/status/:id', (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
     const { ativo_usuario } = req.body;
 
     if (![0, 1].includes(Number(ativo_usuario))) {
@@ -243,460 +257,357 @@ app.put('/usuario/status/:id', (req, res) => {
         });
     }
 
-    const sql = "UPDATE usuario SET ativo_usuario = ? WHERE id_usuario = ?";
-    db.query(sql, [ativo_usuario, id], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao atualizar status do usuário:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao atualizar status do usuário' 
-            });
+    connection.query(
+        'UPDATE usuario SET ativo_usuario = ? WHERE id_usuario = ?',
+        [ativo_usuario, id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao atualizar status do usuário:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao atualizar status do usuário' 
+                });
+            }
+            res.json({ success: true, message: 'Status do usuário atualizado com sucesso' });
         }
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Usuário não encontrado' 
-            });
-        }
-
-        res.json({ 
-            success: true, 
-            message: `✅ Status do usuário atualizado para ${ativo_usuario === 1 ? 'ativo' : 'inativo'}` 
-        });
-    });
+    );
 });
 
 // ==================== ROTAS DE PRODUTO ====================
 
 // Listar todos os produtos
 app.get('/produto', (req, res) => {
-    const sql = `
+    const query = `
         SELECT p.*, f.nome_fornecedor 
         FROM produto p 
         LEFT JOIN fornecedor f ON p.id_produto_fornecedor = f.id_fornecedor 
-        ORDER BY p.nome_produto`;
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao listar produtos:', err);
+        ORDER BY p.nome_produto
+    `;
+    
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('❌ Erro ao buscar produtos:', error);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Erro ao listar produtos' 
+                message: 'Erro ao buscar produtos' 
             });
         }
-        res.json({ 
-            success: true, 
-            produtos: results 
-        });
+        res.json({ success: true, produtos: results });
     });
 });
 
 // Buscar produto por ID
 app.get('/produto/:id', (req, res) => {
-    const { id } = req.params;
-    const sql = `
-        SELECT p.*, f.nome_fornecedor 
-        FROM produto p 
-        LEFT JOIN fornecedor f ON p.id_produto_fornecedor = f.id_fornecedor 
-        WHERE p.id_produto = ?`;
-
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao buscar produto:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao buscar produto' 
-            });
+    const id = req.params.id;
+    connection.query(
+        'SELECT * FROM produto WHERE id_produto = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar produto:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao buscar produto' 
+                });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Produto não encontrado' 
+                });
+            }
+            res.json(results[0]);
         }
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Produto não encontrado' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            produto: results[0] 
-        });
-    });
+    );
 });
 
 // Cadastrar novo produto
 app.post('/produto', (req, res) => {
     const { nome_produto, preco_produto, id_produto_fornecedor } = req.body;
-
-    const sql = "INSERT INTO produto (nome_produto, preco_produto, id_produto_fornecedor) VALUES (?, ?, ?)";
-    db.query(sql, [nome_produto, preco_produto, id_produto_fornecedor], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao cadastrar produto:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao cadastrar produto' 
+    connection.query(
+        'INSERT INTO produto (nome_produto, preco_produto, id_produto_fornecedor) VALUES (?, ?, ?)',
+        [nome_produto, preco_produto, id_produto_fornecedor],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao criar produto:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao criar produto' 
+                });
+            }
+            res.status(201).json({ 
+                success: true, 
+                message: 'Produto criado com sucesso',
+                id: results.insertId 
             });
         }
-        res.status(201).json({ 
-            success: true, 
-            message: '✅ Produto cadastrado com sucesso!', 
-            id: result.insertId 
-        });
-    });
+    );
 });
 
 // Atualizar produto
 app.put('/produto/:id', (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
     const { nome_produto, preco_produto, id_produto_fornecedor } = req.body;
-
-    const sql = "UPDATE produto SET nome_produto = ?, preco_produto = ?, id_produto_fornecedor = ? WHERE id_produto = ?";
-    db.query(sql, [nome_produto, preco_produto, id_produto_fornecedor, id], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao atualizar produto:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao atualizar produto' 
-            });
+    connection.query(
+        'UPDATE produto SET nome_produto = ?, preco_produto = ?, id_produto_fornecedor = ? WHERE id_produto = ?',
+        [nome_produto, preco_produto, id_produto_fornecedor, id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao atualizar produto:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao atualizar produto' 
+                });
+            }
+            res.json({ success: true, message: 'Produto atualizado com sucesso' });
         }
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Produto não encontrado' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            message: '✅ Produto atualizado com sucesso!' 
-        });
-    });
+    );
 });
 
 // Excluir produto
 app.delete('/produto/:id', (req, res) => {
-    const { id } = req.params;
-
-    const sql = "DELETE FROM produto WHERE id_produto = ?";
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao excluir produto:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao excluir produto' 
-            });
+    const id = req.params.id;
+    connection.query(
+        'DELETE FROM produto WHERE id_produto = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao excluir produto:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao excluir produto' 
+                });
+            }
+            if (results.affectedRows === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Produto não encontrado' 
+                });
+            }
+            res.json({ success: true, message: 'Produto excluído com sucesso' });
         }
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Produto não encontrado' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            message: '✅ Produto excluído com sucesso!' 
-        });
-    });
+    );
 });
 
 // ==================== ROTAS DE FORNECEDOR ====================
 
 // Listar todos os fornecedores
 app.get('/fornecedor', (req, res) => {
-    const sql = "SELECT * FROM fornecedor ORDER BY nome_fornecedor";
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao listar fornecedores:', err);
+    connection.query('SELECT * FROM fornecedor', (error, results) => {
+        if (error) {
+            console.error('❌ Erro ao buscar fornecedores:', error);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Erro ao listar fornecedores' 
+                message: 'Erro ao buscar fornecedores' 
             });
         }
-        res.json({ 
-            success: true, 
-            fornecedores: results 
-        });
+        res.json({ success: true, fornecedores: results });
     });
 });
 
 // Buscar fornecedor por ID
 app.get('/fornecedor/:id', (req, res) => {
-    const { id } = req.params;
-    const sql = "SELECT * FROM fornecedor WHERE id_fornecedor = ?";
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao buscar fornecedor:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao buscar fornecedor' 
-            });
+    const id = req.params.id;
+    connection.query(
+        'SELECT * FROM fornecedor WHERE id_fornecedor = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar fornecedor:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao buscar fornecedor' 
+                });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Fornecedor não encontrado' 
+                });
+            }
+            res.json({ success: true, fornecedor: results[0] });
         }
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Fornecedor não encontrado' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            fornecedor: results[0] 
-        });
-    });
+    );
 });
 
 // Cadastrar novo fornecedor
 app.post('/fornecedor', (req, res) => {
     const { nome_fornecedor, cnpj_fornecedor } = req.body;
-
-    const checkSql = "SELECT * FROM fornecedor WHERE cnpj_fornecedor = ?";
-    db.query(checkSql, [cnpj_fornecedor], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao verificar CNPJ:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar CNPJ' 
-            });
-        }
-
-        if (results.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'CNPJ já cadastrado!' 
-            });
-        }
-
-        const insertSql = "INSERT INTO fornecedor (nome_fornecedor, cnpj_fornecedor) VALUES (?, ?)";
-        db.query(insertSql, [nome_fornecedor, cnpj_fornecedor], (err, result) => {
-            if (err) {
-                console.error('❌ Erro ao cadastrar fornecedor:', err);
+    connection.query(
+        'INSERT INTO fornecedor (nome_fornecedor, cnpj_fornecedor) VALUES (?, ?)',
+        [nome_fornecedor, cnpj_fornecedor],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao criar fornecedor:', error);
                 return res.status(500).json({ 
                     success: false, 
-                    message: 'Erro ao cadastrar fornecedor' 
+                    message: 'Erro ao criar fornecedor' 
                 });
             }
             res.status(201).json({ 
                 success: true, 
-                message: '✅ Fornecedor cadastrado com sucesso!', 
-                id: result.insertId 
+                message: 'Fornecedor criado com sucesso',
+                id: results.insertId 
             });
-        });
-    });
+        }
+    );
 });
 
 // Atualizar fornecedor
 app.put('/fornecedor/:id', (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
     const { nome_fornecedor, cnpj_fornecedor } = req.body;
-
-    const checkSql = "SELECT * FROM fornecedor WHERE cnpj_fornecedor = ? AND id_fornecedor != ?";
-    db.query(checkSql, [cnpj_fornecedor, id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao verificar CNPJ:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar CNPJ' 
-            });
-        }
-
-        if (results.length > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'CNPJ já cadastrado para outro fornecedor!' 
-            });
-        }
-
-        const updateSql = "UPDATE fornecedor SET nome_fornecedor = ?, cnpj_fornecedor = ? WHERE id_fornecedor = ?";
-        db.query(updateSql, [nome_fornecedor, cnpj_fornecedor, id], (err, result) => {
-            if (err) {
-                console.error('❌ Erro ao atualizar fornecedor:', err);
+    connection.query(
+        'UPDATE fornecedor SET nome_fornecedor = ?, cnpj_fornecedor = ? WHERE id_fornecedor = ?',
+        [nome_fornecedor, cnpj_fornecedor, id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao atualizar fornecedor:', error);
                 return res.status(500).json({ 
                     success: false, 
                     message: 'Erro ao atualizar fornecedor' 
                 });
             }
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Fornecedor não encontrado' 
-                });
-            }
-            res.json({ 
-                success: true, 
-                message: '✅ Fornecedor atualizado com sucesso!' 
-            });
-        });
-    });
+            res.json({ success: true, message: 'Fornecedor atualizado com sucesso' });
+        }
+    );
 });
 
 // Excluir fornecedor
 app.delete('/fornecedor/:id', (req, res) => {
-    const { id } = req.params;
-
-    const checkProdutosSql = "SELECT COUNT(*) as total FROM produto WHERE id_produto_fornecedor = ?";
-    db.query(checkProdutosSql, [id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao verificar produtos:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar produtos vinculados' 
-            });
-        }
-
-        if (results[0].total > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Não é possível excluir o fornecedor pois existem produtos vinculados a ele' 
-            });
-        }
-
-        const deleteSql = "DELETE FROM fornecedor WHERE id_fornecedor = ?";
-        db.query(deleteSql, [id], (err, result) => {
-            if (err) {
-                console.error('❌ Erro ao excluir fornecedor:', err);
+    const id = req.params.id;
+    connection.query(
+        'DELETE FROM fornecedor WHERE id_fornecedor = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao excluir fornecedor:', error);
                 return res.status(500).json({ 
                     success: false, 
                     message: 'Erro ao excluir fornecedor' 
                 });
             }
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ 
-                    success: false, 
-                    message: 'Fornecedor não encontrado' 
-                });
-            }
-            res.json({ 
-                success: true, 
-                message: '✅ Fornecedor excluído com sucesso!' 
-            });
-        });
-    });
+            res.json({ success: true, message: 'Fornecedor excluído com sucesso' });
+        }
+    );
 });
 
 // ==================== ROTAS DE PEDIDO ====================
 
 // Listar todos os pedidos
 app.get('/pedido', (req, res) => {
-    const sql = `
-        SELECT p.*, u.nome_usuario, pr.nome_produto, f.nome_fornecedor
+    const query = `
+        SELECT p.*, pr.nome_produto, f.nome_fornecedor
         FROM pedido p
-        LEFT JOIN usuario u ON p.id_usuario_pedido = u.id_usuario
         LEFT JOIN produto pr ON p.id_produto_pedido = pr.id_produto
         LEFT JOIN fornecedor f ON p.id_fornecedor_pedido = f.id_fornecedor
-        ORDER BY p.id_pedido DESC`;
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao listar pedidos:', err);
+        ORDER BY p.id_pedido DESC
+    `;
+    
+    connection.query(query, (error, results) => {
+        if (error) {
+            console.error('❌ Erro ao buscar pedidos:', error);
             return res.status(500).json({ 
                 success: false, 
-                message: 'Erro ao listar pedidos' 
+                message: 'Erro ao buscar pedidos' 
             });
         }
-        res.json({ 
-            success: true, 
-            pedidos: results 
-        });
+        res.json({ success: true, pedidos: results });
     });
 });
 
 // Buscar pedido por ID
 app.get('/pedido/:id', (req, res) => {
-    const { id } = req.params;
-    const sql = `
-        SELECT p.*, u.nome_usuario, pr.nome_produto, f.nome_fornecedor
-        FROM pedido p
-        LEFT JOIN usuario u ON p.id_usuario_pedido = u.id_usuario
-        LEFT JOIN produto pr ON p.id_produto_pedido = pr.id_produto
-        LEFT JOIN fornecedor f ON p.id_fornecedor_pedido = f.id_fornecedor
-        WHERE p.id_pedido = ?`;
-
-    db.query(sql, [id], (err, results) => {
-        if (err) {
-            console.error('❌ Erro ao buscar pedido:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao buscar pedido' 
-            });
+    const id = req.params.id;
+    connection.query(
+        'SELECT * FROM pedido WHERE id_pedido = ?',
+        [id],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar pedido:', error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: 'Erro ao buscar pedido' 
+                });
+            }
+            if (results.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Pedido não encontrado' 
+                });
+            }
+            res.json(results[0]);
         }
-        if (results.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Pedido não encontrado' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            pedido: results[0] 
-        });
-    });
+    );
 });
 
 // Cadastrar novo pedido
 app.post('/pedido', (req, res) => {
     const { 
-        id_usuario_pedido, 
-        id_produto_pedido, 
+        id_usuario_pedido,
+        nome_usuario,
+        id_produto_pedido,
         quantidade_produto,
         preco_produto
     } = req.body;
 
-    console.log('Dados recebidos:', req.body);
-
-    // Verificar produto e fornecedor
-    const sqlProduto = `
-        SELECT p.*, f.id_fornecedor
-        FROM produto p
-        JOIN fornecedor f ON p.id_produto_fornecedor = f.id_fornecedor
-        WHERE p.id_produto = ?`;
-
-    db.query(sqlProduto, [id_produto_pedido], (err, resultsProduto) => {
-        if (err) {
-            console.error('❌ Erro ao verificar produto:', err);
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Erro ao verificar produto' 
-            });
-        }
-
-        if (resultsProduto.length === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Produto não encontrado' 
-            });
-        }
-
-        const produto = resultsProduto[0];
-        const id_fornecedor = produto.id_fornecedor;
-
-        // Inserir pedido
-        const sqlPedido = `
-            INSERT INTO pedido (
-                id_usuario_pedido,
-                id_produto_pedido,
-                quantidade_produto,
-                preco_produto_pedido,
-                id_fornecedor_pedido
-            ) VALUES (?, ?, ?, ?, ?)`;
-
-        db.query(sqlPedido, [
-            id_usuario_pedido,
-            id_produto_pedido,
-            quantidade_produto,
-            produto.preco_produto,
-            id_fornecedor
-        ], (err, resultPedido) => {
-            if (err) {
-                console.error('❌ Erro ao cadastrar pedido:', err);
+    // Primeiro, buscar o fornecedor do produto
+    connection.query(
+        'SELECT id_produto_fornecedor FROM produto WHERE id_produto = ?',
+        [id_produto_pedido],
+        (error, results) => {
+            if (error) {
+                console.error('❌ Erro ao buscar fornecedor do produto:', error);
                 return res.status(500).json({ 
                     success: false, 
-                    message: 'Erro ao cadastrar pedido' 
+                    message: 'Erro ao criar pedido' 
                 });
             }
 
-            res.status(201).json({ 
-                success: true, 
-                message: '✅ Pedido cadastrado com sucesso!', 
-                id: resultPedido.insertId 
-            });
-        });
-    });
+            if (results.length === 0) {
+                return res.status(404).json({ 
+                    success: false, 
+                    message: 'Produto não encontrado' 
+                });
+            }
+
+            const id_fornecedor = results[0].id_produto_fornecedor;
+
+            // Criar o pedido
+            connection.query(
+                `INSERT INTO pedido (
+                    id_usuario_pedido, 
+                    nome_usuario,
+                    id_produto_pedido, 
+                    quantidade_produto, 
+                    preco_produto_pedido,
+                    id_fornecedor_pedido
+                ) VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    id_usuario_pedido,
+                    nome_usuario,
+                    id_produto_pedido,
+                    quantidade_produto,
+                    preco_produto,
+                    id_fornecedor
+                ],
+                (error, results) => {
+                    if (error) {
+                        console.error('❌ Erro ao criar pedido:', error);
+                        return res.status(500).json({ 
+                            success: false, 
+                            message: 'Erro ao criar pedido' 
+                        });
+                    }
+                    res.status(201).json({ 
+                        success: true, 
+                        message: 'Pedido criado com sucesso',
+                        id_pedido: results.insertId 
+                    });
+                }
+            );
+        }
+    );
 });
 
 // Atualizar pedido
@@ -720,22 +631,22 @@ app.put('/pedido/:id', (req, res) => {
             id_fornecedor_pedido = ?
         WHERE id_pedido = ?`;
 
-    db.query(sql, [
+    connection.query(sql, [
         id_usuario_pedido, 
         id_produto_pedido, 
         quantidade_produto, 
         preco_produto_pedido, 
         id_fornecedor_pedido, 
         id
-    ], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao atualizar pedido:', err);
+    ], (error, results) => {
+        if (error) {
+            console.error('❌ Erro ao atualizar pedido:', error);
             return res.status(500).json({ 
                 success: false, 
                 message: 'Erro ao atualizar pedido' 
             });
         }
-        if (result.affectedRows === 0) {
+        if (results.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'Pedido não encontrado' 
@@ -753,15 +664,15 @@ app.delete('/pedido/:id', (req, res) => {
     const { id } = req.params;
 
     const sql = "DELETE FROM pedido WHERE id_pedido = ?";
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error('❌ Erro ao excluir pedido:', err);
+    connection.query(sql, [id], (error, results) => {
+        if (error) {
+            console.error('❌ Erro ao excluir pedido:', error);
             return res.status(500).json({ 
                 success: false, 
                 message: 'Erro ao excluir pedido' 
             });
         }
-        if (result.affectedRows === 0) {
+        if (results.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'Pedido não encontrado' 
@@ -772,6 +683,17 @@ app.delete('/pedido/:id', (req, res) => {
             message: '✅ Pedido excluído com sucesso!' 
         });
     });
+});
+
+// Rota para buscar níveis de acesso
+app.get('/niveis', (req, res) => {
+    // Retornar os níveis de acesso fixos
+    const niveis = [
+        { id: 1, nome: 'Administrador', nivel: 'admin' },
+        { id: 2, nome: 'Usuário de Produtos', nivel: 'usuario_produto' },
+        { id: 3, nome: 'Usuário de Pedidos', nivel: 'usuario_pedido' }
+    ];
+    res.json({ success: true, niveis: niveis });
 });
 
 // Iniciar servidor

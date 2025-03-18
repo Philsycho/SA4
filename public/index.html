@@ -53,28 +53,32 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ nome_usuario, senha_usuario })
+                    body: JSON.stringify({ 
+                        nome_usuario, 
+                        senha_usuario 
+                    })
                 });
 
                 console.log('Status da resposta:', response.status);
                 const data = await response.json();
                 console.log('Dados recebidos:', data);
 
-                if (!data.success) {
+                if (data.success) {
+                    // Armazenar dados do usuário
+                    localStorage.setItem('usuario', JSON.stringify({
+                        id_usuario: data.usuario.id_usuario,
+                        nome_usuario: data.usuario.nome_usuario,
+                        email_usuario: data.usuario.email_usuario,
+                        id_nivel_usuario: data.usuario.id_nivel_usuario,
+                        ativo_usuario: data.usuario.ativo_usuario,
+                        logado: true
+                    }));
+
+                    console.log('Login bem-sucedido, redirecionando...');
+                    window.location.href = "tela_inicial.html";
+                } else {
                     throw new Error(data.message || 'Erro no login');
                 }
-
-                // Armazenar dados do usuário
-                localStorage.setItem('usuario', JSON.stringify({
-                    id_usuario: data.usuario.id_usuario,
-                    nome_usuario: data.usuario.nome_usuario,
-                    email_usuario: data.usuario.email_usuario,
-                    ativo_usuario: data.usuario.ativo_usuario,
-                    logado: true
-                }));
-
-                console.log('Login bem-sucedido, redirecionando...');
-                window.location.href = "tela_inicial.html";
             } catch (error) {
                 console.error('Erro durante o login:', error);
                 alert(error.message || "Erro ao tentar fazer login. Verifique suas credenciais.");

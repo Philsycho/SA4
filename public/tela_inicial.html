@@ -44,9 +44,11 @@
         <div class="user-info">
             <i class="fas fa-user-circle"></i>
             <p id="userNameDisplay">Carregando...</p>
+            <p id="userLevelDisplay" style="font-size: 0.9em; color: #666;"></p>
         </div>
         
-        <div class="menu-section">
+        <!-- Menu de Produtos - Visível para admin e usuario_produto -->
+        <div class="menu-section" id="menuProdutos" style="display: none;">
             <h3><i class="fas fa-box"></i> Produtos</h3>
             <button onclick="redirecionar('produto_novo.html')">
                 <i class="fas fa-plus"></i> Novo Produto
@@ -56,7 +58,8 @@
             </button>
         </div>
 
-        <div class="menu-section">
+        <!-- Menu de Fornecedores - Visível para admin e usuario_produto -->
+        <div class="menu-section" id="menuFornecedores" style="display: none;">
             <h3><i class="fas fa-truck"></i> Fornecedores</h3>
             <button onclick="redirecionar('fornecedor_novo.html')">
                 <i class="fas fa-plus"></i> Novo Fornecedor
@@ -66,7 +69,8 @@
             </button>
         </div>
 
-        <div class="menu-section">
+        <!-- Menu de Pedidos - Visível para admin e usuario_pedido -->
+        <div class="menu-section" id="menuPedidos" style="display: none;">
             <h3><i class="fas fa-shopping-cart"></i> Pedidos</h3>
             <button onclick="redirecionar('pedido_novo.html')">
                 <i class="fas fa-plus"></i> Novo Pedido
@@ -76,7 +80,8 @@
             </button>
         </div>
 
-        <div class="menu-section">
+        <!-- Menu de Usuários - Visível apenas para admin -->
+        <div class="menu-section" id="menuUsuarios" style="display: none;">
             <h3><i class="fas fa-user"></i> Usuários</h3>
             <button onclick="redirecionar('usuario_consultar.html')">
                 <i class="fas fa-user-plus"></i> Consultar Usuário
@@ -112,6 +117,34 @@
             window.location.href = 'index.html';
         }
 
+        function verificarPermissoes(nivelUsuario) {
+            console.log('Verificando permissões para nível:', nivelUsuario);
+            
+            // Menu de Produtos
+            const menuProdutos = document.getElementById('menuProdutos');
+            if (nivelUsuario === 1 || nivelUsuario === 2) { // admin ou usuario_produto
+                menuProdutos.style.display = 'block';
+            }
+
+            // Menu de Fornecedores
+            const menuFornecedores = document.getElementById('menuFornecedores');
+            if (nivelUsuario === 1 || nivelUsuario === 2) { // admin ou usuario_produto
+                menuFornecedores.style.display = 'block';
+            }
+
+            // Menu de Pedidos
+            const menuPedidos = document.getElementById('menuPedidos');
+            if (nivelUsuario === 1 || nivelUsuario === 3) { // admin ou usuario_pedido
+                menuPedidos.style.display = 'block';
+            }
+
+            // Menu de Usuários (apenas admin)
+            const menuUsuarios = document.getElementById('menuUsuarios');
+            if (nivelUsuario === 1) { // admin
+                menuUsuarios.style.display = 'block';
+            }
+        }
+
         // Verificar se o usuário está logado e personalizar a mensagem
         document.addEventListener('DOMContentLoaded', function() {
             const usuarioData = localStorage.getItem('usuario');
@@ -127,9 +160,23 @@
                     return;
                 }
 
+                console.log('Dados do usuário:', usuario);
+
                 // Atualizar nome do usuário no menu lateral
                 const userNameDisplay = document.getElementById('userNameDisplay');
                 userNameDisplay.textContent = usuario.nome_usuario;
+
+                // Mostrar nível do usuário
+                const userLevelDisplay = document.getElementById('userLevelDisplay');
+                const nivelTexto = {
+                    1: 'Administrador',
+                    2: 'Usuário de Produtos',
+                    3: 'Usuário de Pedidos'
+                };
+                userLevelDisplay.textContent = nivelTexto[usuario.id_nivel_usuario] || 'Usuário';
+
+                // Verificar permissões e mostrar menus apropriados
+                verificarPermissoes(usuario.id_nivel_usuario);
 
                 // Personalizar mensagem de boas-vindas
                 const welcomeMessage = document.getElementById('welcome-message');

@@ -18,6 +18,9 @@
             <a href="fornecedor_novo.html" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Novo Fornecedor
             </a>
+            <button onclick="window.location.href='tela_inicial.html'" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Buscar fornecedor...">
                 <i class="fas fa-search"></i>
@@ -42,7 +45,7 @@
     </div>
 
     <!-- Modal de Edição -->
-    <div id="editModal" class="modal">
+    <div id="editModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-edit"></i> Editar Fornecedor</h2>
@@ -163,7 +166,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('editId').value = data.fornecedor.id_fornecedor;
+                        document.getElementById('editId').value = id;
                         document.getElementById('editNome').value = data.fornecedor.nome_fornecedor;
                         document.getElementById('editCNPJ').value = data.fornecedor.cnpj_fornecedor;
                         document.getElementById('editModal').style.display = 'block';
@@ -199,16 +202,16 @@
             }
         }
 
-        // Configurar modal
+        // Função para fechar o modal
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
         }
 
-        document.querySelector('.close').onclick = closeModal;
-
+        // Fechar modal quando clicar fora dele
         window.onclick = function(event) {
-            if (event.target == document.getElementById('editModal')) {
-                closeModal();
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
             }
         }
 

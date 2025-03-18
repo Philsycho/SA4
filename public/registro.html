@@ -6,6 +6,42 @@
     <title>Registro de Usuário</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <style>
+        .input-group {
+            position: relative;
+        }
+        .password-requirements {
+            display: none;
+            position: absolute;
+            left: 105%; /* Posiciona à direita do campo de input */
+            top: 0;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 200px;
+            z-index: 100;
+        }
+        .password-requirements ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 5px 0;
+        }
+        .password-requirements p {
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        .password-requirements li {
+            margin: 3px 0;
+        }
+        .fa-check-circle {
+            color: #4CAF50;
+        }
+        .fa-times-circle {
+            color: #f44336;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -25,9 +61,9 @@
             <div class="input-group">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="senha_usuario" placeholder="Senha" required minlength="6">
-                <div class="password-requirements" style="display: none; position: absolute; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 100; width: 200px;">
+                <div class="password-requirements">
                     <p>A senha deve conter:</p>
-                    <ul style="list-style: none; padding-left: 0;">
+                    <ul>
                         <li><i class="fas fa-times-circle"></i> Mínimo 6 caracteres</li>
                         <li><i class="fas fa-times-circle"></i> Uma letra maiúscula</li>
                         <li><i class="fas fa-times-circle"></i> Uma letra minúscula</li>
@@ -38,6 +74,12 @@
             <div class="input-group">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="confirma_senha" placeholder="Confirme a Senha" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-user-tag"></i>
+                <select id="id_nivel_usuario" required>
+                    <option value="">Selecione o nível de acesso</option>
+                </select>
             </div>
             <div class="botoes-container">
                 <button type="button" onclick="window.location.href='tela_inicial.html'">
@@ -85,13 +127,64 @@
             requirements[3].innerHTML = `<i class="fas fa-${/[0-9]/.test(senha) ? 'check' : 'times'}-circle"></i> Um número`;
         }
 
-        document.getElementById('registroForm').addEventListener('submit', function(event) {
+        // Adicionar validação em tempo real para espaços no nome de usuário
+        document.getElementById('nome_usuario').addEventListener('input', function(e) {
+            if (this.value.includes(' ')) {
+                this.setCustomValidity('O nome de usuário não pode conter espaços');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Carregar níveis de acesso
+        async function carregarNiveis() {
+            try {
+                console.log('Carregando níveis de acesso...');
+                const select = document.getElementById('id_nivel_usuario');
+                
+                // Definir os níveis de acesso diretamente
+                const niveis = [
+                    { id: 1, nome: 'Administrador' },
+                    { id: 2, nome: 'Usuário de Produtos' },
+                    { id: 3, nome: 'Usuário de Pedidos' }
+                ];
+
+                // Limpar opções existentes
+                select.innerHTML = '<option value="">Selecione o nível de acesso</option>';
+                
+                // Adicionar os níveis ao select
+                niveis.forEach(nivel => {
+                    const option = document.createElement('option');
+                    option.value = nivel.id;
+                    option.textContent = nivel.nome;
+                    select.appendChild(option);
+                });
+
+                console.log('Níveis de acesso carregados com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar níveis:', error);
+                alert('Erro ao carregar níveis de acesso');
+            }
+        }
+
+        // Carregar níveis ao iniciar a página
+        document.addEventListener('DOMContentLoaded', carregarNiveis);
+
+        document.getElementById('registroForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             
             const nome_usuario = document.getElementById('nome_usuario').value;
             const email_usuario = document.getElementById('email_usuario').value;
-            const senha = senhaInput.value;
-            const confirmaSenha = confirmaSenhaInput.value;
+            const senha = document.getElementById('senha_usuario').value;
+            const confirmaSenha = document.getElementById('confirma_senha').value;
+            const id_nivel_usuario = document.getElementById('id_nivel_usuario').value;
+
+            // Validar se um nível foi selecionado
+            if (!id_nivel_usuario) {
+                alert('Por favor, selecione um nível de acesso');
+                return;
+            }
 
             // Validar nome de usuário
             if (nome_usuario.length < 3) {
@@ -123,40 +216,32 @@
                 alert('As senhas não coincidem');
                 return;
             }
-            
-            fetch('http://localhost:3000/usuario', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    nome_usuario,
-                    email_usuario,
-                    senha_usuario: senha
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
+
+            try {
+                const response = await fetch('http://localhost:3000/usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome_usuario,
+                        email_usuario,
+                        senha_usuario: senha,
+                        id_nivel_usuario: parseInt(id_nivel_usuario)
+                    })
+                });
+
+                const data = await response.json();
+                
                 if (data.success) {
                     alert('Usuário registrado com sucesso!');
                     window.location.href = 'usuario_consultar.html';
                 } else {
                     alert(data.message || 'Erro ao registrar usuário.');
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Erro ao registrar usuário:', error);
                 alert('Erro ao tentar registrar usuário.');
-            });
-        });
-
-        // Adicionar validação em tempo real para espaços no nome de usuário
-        document.getElementById('nome_usuario').addEventListener('input', function(e) {
-            if (this.value.includes(' ')) {
-                this.setCustomValidity('O nome de usuário não pode conter espaços');
-                this.reportValidity();
-            } else {
-                this.setCustomValidity('');
             }
         });
     </script>

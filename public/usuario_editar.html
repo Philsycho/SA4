@@ -6,6 +6,41 @@
     <title>Editar Usuário</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .input-group {
+            position: relative;
+        }
+        .password-requirements {
+            display: none;
+            position: absolute;
+            left: 105%; /* Posiciona à direita do campo de input */
+            top: 0;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 200px;
+            z-index: 100;
+        }
+        .password-requirements ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 5px 0;
+        }
+        .password-requirements p {
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        .password-requirements li {
+            margin: 3px 0;
+        }
+        .fa-check-circle {
+            color: #4CAF50;
+        }
+        .fa-times-circle {
+            color: #f44336;
+        }
+    </style>
 </head>
 <body>
     <div class="content">
@@ -19,6 +54,23 @@
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" id="email_usuario" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="senha_usuario" placeholder="Nova Senha (deixe em branco para manter a atual)" minlength="6">
+                    <div class="password-requirements">
+                        <p>A senha deve conter:</p>
+                        <ul>
+                            <li><i class="fas fa-times-circle"></i> Mínimo 6 caracteres</li>
+                            <li><i class="fas fa-times-circle"></i> Uma letra maiúscula</li>
+                            <li><i class="fas fa-times-circle"></i> Uma letra minúscula</li>
+                            <li><i class="fas fa-times-circle"></i> Um número</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirma_senha" placeholder="Confirme a Nova Senha">
                 </div>
                 <div class="input-group">
                     <i class="fas fa-toggle-on"></i>
@@ -42,6 +94,41 @@
     <script src="base.js"></script>
     <script>
         let usuarioId;
+        const senhaInput = document.getElementById('senha_usuario');
+        const confirmaSenhaInput = document.getElementById('confirma_senha');
+        const passwordRequirements = document.querySelector('.password-requirements');
+
+        // Mostrar requisitos da senha quando o campo recebe foco
+        senhaInput.addEventListener('focus', () => {
+            passwordRequirements.style.display = 'block';
+        });
+
+        // Esconder requisitos da senha quando o campo perde foco
+        senhaInput.addEventListener('blur', () => {
+            passwordRequirements.style.display = 'none';
+        });
+
+        // Validar senha em tempo real
+        senhaInput.addEventListener('input', validarSenha);
+
+        function validarSenha() {
+            const senha = senhaInput.value;
+            if (senha) { // Só valida se houver senha
+                const requirements = passwordRequirements.querySelectorAll('li');
+                
+                // Validar comprimento mínimo
+                requirements[0].innerHTML = `<i class="fas fa-${senha.length >= 6 ? 'check' : 'times'}-circle"></i> Mínimo 6 caracteres`;
+                
+                // Validar letra maiúscula
+                requirements[1].innerHTML = `<i class="fas fa-${/[A-Z]/.test(senha) ? 'check' : 'times'}-circle"></i> Uma letra maiúscula`;
+                
+                // Validar letra minúscula
+                requirements[2].innerHTML = `<i class="fas fa-${/[a-z]/.test(senha) ? 'check' : 'times'}-circle"></i> Uma letra minúscula`;
+                
+                // Validar número
+                requirements[3].innerHTML = `<i class="fas fa-${/[0-9]/.test(senha) ? 'check' : 'times'}-circle"></i> Um número`;
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -68,11 +155,32 @@
         document.getElementById('editarUsuarioForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
+            const senha = document.getElementById('senha_usuario').value;
+            const confirmaSenha = document.getElementById('confirma_senha').value;
+
+            // Validar senha se foi fornecida
+            if (senha) {
+                if (senha.length < 6 || !/[A-Z]/.test(senha) || !/[a-z]/.test(senha) || !/[0-9]/.test(senha)) {
+                    alert('A senha não atende aos requisitos mínimos de segurança');
+                    return;
+                }
+
+                if (senha !== confirmaSenha) {
+                    alert('As senhas não coincidem');
+                    return;
+                }
+            }
+
             const dadosAtualizados = {
                 nome_usuario: document.getElementById('nome_usuario').value,
                 email_usuario: document.getElementById('email_usuario').value,
                 ativo_usuario: document.getElementById('ativo_usuario').value === "1" ? 1 : 0
             };
+
+            // Adicionar senha apenas se foi fornecida
+            if (senha) {
+                dadosAtualizados.senha_usuario = senha;
+            }
 
             fetch(`http://localhost:3000/usuario/${usuarioId}`, {
                 method: 'PUT',
