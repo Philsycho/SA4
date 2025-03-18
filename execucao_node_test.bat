@@ -125,9 +125,26 @@ if exist "%api_js_path%" (
 call :display_step "4/7" "Verificando instalação do XAMPP"
 call :set_checkpoint "VERIFICACAO_XAMPP"
 
+:: Verificar se o XAMPP está instalado corretamente
+set "xampp_phpmyadmin_config=%xampp_default_path%\phpMyAdmin\config.inc.php"
 if not exist "%xampp_default_path%\mysql\bin\mysql.exe" (
-    call :log_message "XAMPP não encontrado. Iniciando processo de instalação"
-    echo XAMPP não encontrado. Iniciando processo de instalação...
+    set "xampp_instalacao_incompleta=1"
+) else if not exist "%xampp_default_path%\phpMyAdmin" (
+    set "xampp_instalacao_incompleta=1"
+) else (
+    set "xampp_instalacao_incompleta=0"
+)
+
+if "%xampp_instalacao_incompleta%"=="1" (
+    call :log_message "XAMPP não encontrado ou instalação incompleta. Iniciando processo de instalação"
+    echo XAMPP não encontrado ou instalação incompleta. Iniciando processo de instalação...
+    
+    :: Remover instalação anterior incompleta
+    if exist "%xampp_default_path%" (
+        echo Removendo instalação anterior incompleta...
+        call :log_message "Tentando remover instalação anterior incompleta"
+        rmdir /S /Q "%xampp_default_path%" > nul 2>&1
+    )
     
     call :log_message "Baixando instalador do XAMPP"
     echo Baixando instalador do XAMPP...
@@ -144,10 +161,28 @@ if not exist "%xampp_default_path%\mysql\bin\mysql.exe" (
         
         call :log_message "Executando o instalador do XAMPP"
         echo Executando o instalador do XAMPP...
-        echo Por favor, siga as instruções na tela do instalador.
+        echo.
+        echo ==========================================
+        echo             IMPORTANTE!
+        echo ==========================================
+        echo.
+        echo Ao iniciar o instalador do XAMPP:
+        echo.
+        echo 1. Certifique-se de aceitar todas as opções padrão
+        echo 2. Mantenha TODOS os componentes selecionados
+        echo 3. NÃO desmarque nenhuma opção, especialmente:
+        echo    - MySQL
+        echo    - phpMyAdmin
+        echo 4. Instale no caminho padrão: C:\xampp
+        echo.
+        echo O script aguardará até você concluir a instalação
+        echo ==========================================
+        echo.
+        pause
         
-        :: Executar o instalador do XAMPP
-        start /wait "" "%xampp_installer%"
+        :: Executar o instalador do XAMPP com direitos de administrador
+        echo Iniciando instalador do XAMPP...
+        powershell -Command "Start-Process '%xampp_installer%' -Verb RunAs -Wait"
         
         echo Aguardando a conclusão da instalação do XAMPP...
         echo Pressione qualquer tecla quando a instalação estiver concluída.
@@ -156,15 +191,40 @@ if not exist "%xampp_default_path%\mysql\bin\mysql.exe" (
         call :log_message "Usuário confirmou conclusão da instalação do XAMPP"
         
         :: Verificar novamente se o XAMPP foi instalado
-        if exist "%xampp_default_path%\mysql\bin\mysql.exe" (
-            call :log_message "XAMPP instalado com sucesso"
-            echo XAMPP instalado com sucesso!
-        ) else (
-            call :log_message "[AVISO] Não foi possível confirmar a instalação do XAMPP"
-            echo [AVISO] Não foi possível confirmar a instalação do XAMPP.
-            echo Verifique se o caminho de instalação do XAMPP é diferente do padrão.
+        if not exist "%xampp_default_path%\mysql\bin\mysql.exe" (
+            call :log_message "[ERRO] Falha na instalação do XAMPP - MySQL não encontrado"
+            echo [ERRO] Falha na instalação do XAMPP - MySQL não encontrado.
             goto :manter_janela_aberta
         )
+        
+        :: Verificar se o phpMyAdmin foi instalado
+        if not exist "%xampp_default_path%\phpMyAdmin" (
+            call :log_message "[ERRO] Falha na instalação do XAMPP - phpMyAdmin não encontrado"
+            echo [ERRO] Falha na instalação do XAMPP - phpMyAdmin não encontrado.
+            goto :manter_janela_aberta
+        )
+        
+        :: Verificar se o arquivo config.inc.php existe ou criar um padrão
+        if not exist "%xampp_phpmyadmin_config%" (
+            call :log_message "Criando arquivo config.inc.php para phpMyAdmin"
+            echo Criando arquivo de configuração para phpMyAdmin...
+            
+            :: Criar um arquivo config.inc.php padrão
+            echo ^<?php > "%xampp_phpmyadmin_config%"
+            echo $cfg['blowfish_secret'] = 'xa2MJsg4BK8w5gJRxrZO1LL9LlbV2fdF'; >> "%xampp_phpmyadmin_config%"
+            echo $i = 0; >> "%xampp_phpmyadmin_config%"
+            echo $i++; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['Servers'][$i]['auth_type'] = 'cookie'; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['Servers'][$i]['host'] = 'localhost'; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['Servers'][$i]['compress'] = false; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['Servers'][$i]['AllowNoPassword'] = true; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['UploadDir'] = ''; >> "%xampp_phpmyadmin_config%"
+            echo $cfg['SaveDir'] = ''; >> "%xampp_phpmyadmin_config%"
+            echo ?^> >> "%xampp_phpmyadmin_config%"
+        )
+        
+        call :log_message "XAMPP instalado com sucesso"
+        echo XAMPP instalado com sucesso!
         
         :: Limpar o instalador
         if exist "%xampp_installer%" del "%xampp_installer%"
@@ -176,6 +236,25 @@ if not exist "%xampp_default_path%\mysql\bin\mysql.exe" (
 ) else (
     call :log_message "XAMPP já está instalado"
     echo XAMPP já está instalado.
+    
+    :: Verificar se o arquivo config.inc.php existe ou criar um padrão
+    if not exist "%xampp_phpmyadmin_config%" (
+        call :log_message "Arquivo config.inc.php não encontrado, criando um padrão"
+        echo Criando arquivo de configuração para phpMyAdmin...
+        
+        :: Criar um arquivo config.inc.php padrão
+        echo ^<?php > "%xampp_phpmyadmin_config%"
+        echo $cfg['blowfish_secret'] = 'xa2MJsg4BK8w5gJRxrZO1LL9LlbV2fdF'; >> "%xampp_phpmyadmin_config%"
+        echo $i = 0; >> "%xampp_phpmyadmin_config%"
+        echo $i++; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['Servers'][$i]['auth_type'] = 'cookie'; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['Servers'][$i]['host'] = 'localhost'; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['Servers'][$i]['compress'] = false; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['Servers'][$i]['AllowNoPassword'] = true; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['UploadDir'] = ''; >> "%xampp_phpmyadmin_config%"
+        echo $cfg['SaveDir'] = ''; >> "%xampp_phpmyadmin_config%"
+        echo ?^> >> "%xampp_phpmyadmin_config%"
+    )
 )
 
 :: 5. Iniciar XAMPP
@@ -189,10 +268,20 @@ if not exist "%xampp_default_path%\xampp-control.exe" (
     goto :manter_janela_aberta
 )
 
-:: Abrir XAMPP Control Panel
-call :log_message "Abrindo XAMPP Control Panel"
-echo Abrindo XAMPP Control Panel...
-start "" "%xampp_default_path%\xampp-control.exe"
+:: Verificar se o XAMPP já está em execução
+tasklist /FI "IMAGENAME eq xampp-control.exe" | find "xampp-control.exe" > nul
+if %errorlevel% equ 0 (
+    call :log_message "XAMPP Control Panel já está em execução. Trazendo para frente."
+    echo XAMPP Control Panel já está em execução. Trazendo janela para frente...
+    
+    :: Trazer para frente usando PowerShell
+    powershell -command "$xamppWindow = (New-Object -ComObject WScript.Shell).AppActivate('XAMPP Control Panel')"
+) else (
+    :: Abrir XAMPP Control Panel se não estiver em execução
+    call :log_message "Abrindo XAMPP Control Panel"
+    echo Abrindo XAMPP Control Panel...
+    start "" "%xampp_default_path%\xampp-control.exe"
+)
 
 :: Instruir o usuário a iniciar os serviços
 echo.
@@ -200,7 +289,7 @@ echo ==========================================
 echo             ATENÇÃO!
 echo ==========================================
 echo.
-echo 1. No XAMPP Control Panel que foi aberto:
+echo 1. No XAMPP Control Panel:
 echo    - Clique no botão "Start" ao lado de "MySQL"
 echo    - Clique no botão "Start" ao lado de "Apache"
 echo.
@@ -224,67 +313,43 @@ timeout /t 10 /nobreak > nul
 call :log_message "Aguardou período adicional para inicialização do MySQL"
 
 :: Verificar configurações no api.js para conexão com o banco
-call :display_step "5.1/7" "Verificando configurações de conexão do banco de dados"
-call :set_checkpoint "VERIFICACAO_CONFIG_MYSQL"
+call :display_step "5.1/7" "Configurando conexão com o banco de dados"
+call :set_checkpoint "CONFIGURACAO_CONEXAO_BD"
 
-:: Criar um arquivo temporário para modificar api.js
-if exist "%api_js_path%" (
-    echo Verificando e ajustando configurações de conexão no api.js...
-    call :log_message "Verificando configurações do banco de dados no api.js"
-    
-    set "temp_file=%userpath%\api_temp.js"
-    type nul > "%temp_file%"
-    
-    set "modificado=0"
-    for /f "usebackq delims=" %%a in ("%api_js_path%") do (
-        set "linha=%%a"
-        
-        :: Verificar se a linha contém as configurações de host do MySQL
-        echo !linha! | findstr /C:"const db = mysql.createConnection({" > nul
-        if !errorlevel! equ 0 (
-            echo %%a >> "%temp_file%"
-            echo.>> "%temp_file%"
-            echo   // Configurações de conexão com timeout aumentado>> "%temp_file%"
-            set "modificado=1"
-            call :log_message "Encontrado bloco de configuração do MySQL"
-        ) else if !modificado! equ 1 (
-            echo !linha! | findstr /C:"host:" > nul
-            if !errorlevel! equ 0 (
-                echo   host: 'localhost', >> "%temp_file%"
-                call :log_message "Definido host para localhost"
-            ) else echo !linha! | findstr /C:"user:" > nul
-            if !errorlevel! equ 0 (
-                echo   user: 'root', >> "%temp_file%"
-                call :log_message "Definido user para root"
-            ) else echo !linha! | findstr /C:"password:" > nul
-            if !errorlevel! equ 0 (
-                echo   password: '', >> "%temp_file%"
-                call :log_message "Definida password vazia"
-            ) else echo !linha! | findstr /C:"database:" > nul
-            if !errorlevel! equ 0 (
-                echo   database: 'sistema_pedidos', >> "%temp_file%"
-                call :log_message "Definido database para sistema_pedidos"
-                echo   connectTimeout: 60000, // Aumentar timeout para 60 segundos >> "%temp_file%"
-                call :log_message "Aumentado o timeout de conexão para 60 segundos"
-                set "modificado=0"
-            ) else (
-                echo %%a >> "%temp_file%"
-            )
-        ) else (
-            echo %%a >> "%temp_file%"
-        )
-    )
-    
-    :: Substituir o arquivo original pelo modificado
-    if exist "%temp_file%" (
-        move /y "%temp_file%" "%api_js_path%" > nul
-        call :log_message "Arquivo api.js atualizado com configurações otimizadas"
-        echo Configurações do banco de dados ajustadas com timeout aumentado.
-    )
-) else (
-    call :log_message "[AVISO] Arquivo api.js não encontrado para ajustar configurações"
-    echo [AVISO] Não foi possível ajustar as configurações do banco de dados.
-)
+echo Configurando conexão com banco de dados existente...
+call :log_message "Recriando arquivo api.js com as configurações corretas"
+
+:: Fazer backup do arquivo original
+copy "%api_js_path%" "%api_js_path%.bak" > nul 2>&1
+call :log_message "Backup do arquivo api.js criado em %api_js_path%.bak"
+
+:: Criar um arquivo completamente novo usando o conteúdo original, mas corrigindo apenas a parte do banco de dados
+echo const express = require('express');> "%api_js_path%"
+echo const mysql = require('mysql2');>> "%api_js_path%"
+echo const cors = require('cors');>> "%api_js_path%"
+echo.>> "%api_js_path%"
+echo const app = express();>> "%api_js_path%"
+echo const port = 3000;>> "%api_js_path%"
+echo.>> "%api_js_path%"
+echo app.use(express.json());>> "%api_js_path%"
+echo app.use(cors());>> "%api_js_path%"
+echo.>> "%api_js_path%"
+echo // Configuração do banco de dados>> "%api_js_path%"
+echo const db = mysql.createConnection({>> "%api_js_path%"
+echo     host: 'localhost',>> "%api_js_path%"
+echo     user: 'root',>> "%api_js_path%"
+echo     password: '',>> "%api_js_path%"
+echo     database: 'sistema_pedidos',>> "%api_js_path%"
+echo     connectTimeout: 300000,>> "%api_js_path%"
+echo     timeout: 300000>> "%api_js_path%"
+echo });>> "%api_js_path%"
+echo.>> "%api_js_path%"
+
+:: Anexar o resto do arquivo a partir da linha 14
+powershell -Command "$content = Get-Content '%api_js_path%.bak'; $content[14..($content.Length-1)] | Out-File -Append -Encoding utf8 '%api_js_path%'"
+
+call :log_message "Arquivo api.js recriado com configuração de banco de dados correta"
+echo Configuração de conexão com banco de dados concluída.
 
 :: 6. Executar api.js
 call :display_step "6/7" "Iniciando servidor Node.js"
