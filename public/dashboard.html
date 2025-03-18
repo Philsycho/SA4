@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SA4</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <span class="page-title">Dashboard</span>
+        <div class="user-info">
+            <span>Bem-vindo, <span id="username"></span></span>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+
+        <div class="menu">
+            <button onclick="window.location.href='pedido_consultar.html'">Consultar Pedidos</button>
+            <button onclick="window.location.href='produto_consultar.html'">Consultar Produtos</button>
+            <button onclick="window.location.href='fornecedor_consultar.html'">Consultar Fornecedores</button>
+            <button onclick="window.location.href='usuario_consultar.html'">Consultar Usuários</button>
+        </div>
+    </div>
+
+    <script>
+        // Verifica se o usuário está logado
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            // Exibe o nome do usuário na navbar
+            document.getElementById('username').textContent = user.nome_usuario;
+        }
+
+        // Função de logout
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

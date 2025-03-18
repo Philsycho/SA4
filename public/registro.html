@@ -4,10 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuário</title>
-    <link rel="stylesheet" href="style_novo.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
+    <style>
+        .botoes-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    
+        .botoes-container button {
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            color: white;
+            transition: background 0.3s ease;
+        }
+    
+        .botoes-container button:first-child {
+            background: #ccc;
+        }
+    
+        .botoes-container button:first-child:hover {
+            background: #999;
+        }
+    
+        .botoes-container button:last-child {
+            background: #007bff;
+        }
+    
+        .botoes-container button:last-child:hover {
+            background: #0056b3;
+        }
+    </style>
+    
     <div class="login-container">
         <div class="login-header">
             <i class="fas fa-user-plus"></i>

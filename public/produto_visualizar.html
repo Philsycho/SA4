@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualização de Produto</title>
-    <link rel="stylesheet" href="style_novo.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -15,15 +15,26 @@
                 <h2>Visualização de Produto</h2>
             </div>
             <div class="produto-item">
-                <p><strong><i class="fas fa-hashtag"></i> ID:</strong> <span id="id_produto"></span></p>
-                <p><strong><i class="fas fa-box"></i> Nome:</strong> <span id="nome_produto"></span></p>
-                <p><strong><i class="fas fa-dollar-sign"></i> Preço:</strong> R$ <span id="preco_produto"></span></p>
-                <p><strong><i class="fas fa-building"></i> Fornecedor:</strong> <span id="fornecedor_produto"></span></p>
-            </div>
-            <div class="botoes-container">
-                <button onclick="editarProduto(document.getElementById('id_produto').innerText)">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
+                <section>
+                    <h2>Informações Gerais</h2>
+                    <p><strong><i class="fas fa-hashtag"></i> ID:</strong> <span id="id_produto"></span></p>
+                    <p><strong><i class="fas fa-box"></i> Nome:</strong> <span id="nome_produto"></span></p>
+                    <p><strong><i class="fas fa-dollar-sign"></i> Preço:</strong> R$ <span id="preco_produto"></span></p>
+                    <p><strong><i class="fas fa-building"></i> Fornecedor:</strong> <span id="fornecedor_produto"></span></p>
+                </section>
+                <section>
+                    <h3>Detalhes do Estoque</h3>
+                    <ul>
+                        <li><strong>Estoque Atual:</strong> 150 unidades</li>
+                        <li><strong>Estoque Mínimo:</strong> 50 unidades</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Ações</h3>
+                    <button onclick="editarProduto(document.getElementById('id_produto').innerText)">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </section>
             </div>
         </div>
     </div>

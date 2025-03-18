@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuário</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Registro de Usuário</h2>
+        <form id="registerForm">
+            <input type="text" id="username" placeholder="Nome de Usuário" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <button type="submit">Registrar</button>
+        </form>
+        <div id="message" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('http://localhost:3000/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nome_usuario: username,
+                    senha_usuario: password,
+                    email_usuario: email
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na requisição');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const message = document.getElementById('message');
+                if (data.id) {
+                    message.style.color = 'green';
+                    message.textContent = 'Usuário registrado com sucesso!';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    message.style.color = 'red';
+                    message.textContent = data.error || 'Erro ao registrar usuário';
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('message').style.color = 'red';
+                document.getElementById('message').textContent = 'Erro ao conectar com o servidor';
+            });
+        });
+    </script>
+</body>
+</html>

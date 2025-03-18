@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="welcome-container">
+        <h1>Bem-vindo, <span id="username"></span>!</h1>
+        <p>Você será redirecionado para o dashboard em <span id="countdown">5</span> segundos...</p>
+    </div>
+
+    <script>
+        // Verifica se o usuário está logado
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            // Exibe o nome do usuário
+            document.getElementById('username').textContent = user.nome_usuario;
+            
+            // Redireciona após 5 segundos
+            let count = 5;
+            const countdownElement = document.getElementById('countdown');
+            const interval = setInterval(() => {
+                count--;
+                countdownElement.textContent = count;
+                if (count === 0) {
+                    clearInterval(interval);
+                    window.location.href = 'dashboard.html';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html> 

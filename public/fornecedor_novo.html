@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novo Fornecedor</title>
-    <link rel="stylesheet" href="style_novo.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
@@ -28,12 +28,12 @@
                     <input type="text" id="cnpj_fornecedor" name="cnpj_fornecedor" placeholder="CNPJ" required maxlength="18">
                 </div>
                 <div class="button-group">
+                    <button type="button" class="btn-voltar" onclick="window.location.href='fornecedor_consultar.html'">
+                        <i class="fas fa-times"></i> Voltar
+                    </button>
                     <button type="submit" class="primary-button">
                         <i class="fas fa-save"></i> Salvar
                     </button>
-                    <a href="fornecedor_consultar.html" class="secondary-button">
-                        <i class="fas fa-times"></i> Cancelar
-                    </a>
                 </div>
             </form>
         </div>
