@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produto</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-box"></i>
+                <h2>Cadastro de Produto</h2>
+            </div>
+            <form id="produtoForm">
+                <div class="input-group">
+                    <i class="fas fa-box"></i>
+                    <input type="text" id="nome_produto" placeholder="Nome do Produto" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="number" id="preco_produto" step="0.01" placeholder="Preço" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-building"></i>
+                    <select id="id_produto_fornecedor" required>
+                        <option value="">Selecione um Fornecedor</option>
+                    </select>
+                </div>
+
+                <div class="botoes-container">
+                    <button type="submit">
+                        <i class="fas fa-save"></i> Cadastrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="util_funcoes.js"></script>
+    <script>
+        // Carregar fornecedores ao iniciar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarFornecedores();
+        });
+
+        // Função para carregar fornecedores
+        function carregarFornecedores() {
+            fetch('http://localhost:3000/fornecedor')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const select = document.getElementById('id_produto_fornecedor');
+                        data.fornecedores.forEach(fornecedor => {
+                            const option = document.createElement('option');
+                            option.value = fornecedor.id_fornecedor;
+                            option.textContent = `${fornecedor.nome_fornecedor} (${fornecedor.cnpj_fornecedor})`;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        alert('Erro ao carregar fornecedores');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar fornecedores:', error);
+                    alert('Erro ao carregar lista de fornecedores.');
+                });
+        }
+
+        // Enviar formulário
+        document.getElementById("produtoForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nome_produto = document.getElementById("nome_produto").value;
+            const preco_produto = document.getElementById("preco_produto").value;
+            const id_produto_fornecedor = document.getElementById("id_produto_fornecedor").value;
+
+            if (!id_produto_fornecedor) {
+                alert('Por favor, selecione um fornecedor');
+                return;
+            }
+
+            fetch("http://localhost:3000/produto", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    nome_produto, 
+                    preco_produto, 
+                    id_produto_fornecedor: parseInt(id_produto_fornecedor) 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById("produtoForm").reset();
+            })
+            .catch(error => {
+                console.error("Erro ao cadastrar produto:", error);
+                alert("Erro ao cadastrar produto.");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -5,18 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Novo Pedido</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
-        <h2>Novo Pedido</h2>
-        <form>
-            <input type="text" id="usuario_pedido" placeholder="Usuário" required>
-            <input type="text" id="produto_pedido" placeholder="Produto" required>
-            <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
-            <input type="number" id="preco_pedido" placeholder="Preço" required>
-            <button type="submit">Registrar</button>
-            <button type="button" onclick="window.history.back()">Cancelar</button>
+    <div class="container">
+        <h1>Novo Pedido</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Buscar produto...">
+        </div>
+        <form id="orderForm">
+            <div class="form-group">
+                <label for="productSelect">Produto:</label>
+                <select id="productSelect" required>
+                    <option value="">Selecione um produto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantidade:</label>
+                <input type="number" id="quantity" required min="1">
+            </div>
+            <div class="info-container">
+                <p>Preço unitário: R$ <span id="unitPrice">0.00</span></p>
+                <p>Fornecedor: <span id="supplier">-</span></p>
+                <p>Total: R$ <span id="totalPrice">0.00</span></p>
+            </div>
+            <div class="button-container">
+                <button type="button" onclick="window.location.href='tela_inicial.html'" class="secondary-button">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button type="submit" class="primary-button">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
         </form>
     </div>
+
+    <script>
+        // Verificar login
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuarioLogado || !usuarioLogado.logado) {
+            window.location.href = 'index.html';
+        }
+
+        let produtos = [];
+        const productSelect = document.getElementById('productSelect');
+        const searchInput = document.getElementById('searchInput');
+        const quantityInput = document.getElementById('quantity');
+        const unitPriceSpan = document.getElementById('unitPrice');
+        const supplierSpan = document.getElementById('supplier');
+        const totalPriceSpan = document.getElementById('totalPrice');
+
+        async function carregarProdutos() {
+            try {
+                console.log('Iniciando carregamento de produtos...');
+                const response = await fetch('http://localhost:3000/produto', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Status da resposta:', response.status);
+                console.log('URL da requisição:', response.url);
+
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Erro ao carregar produtos');
+                }
+
+                if (!Array.isArray(data.produtos)) {
+                    throw new Error('Formato de dados inválido: produtos não é um array');
+                }
+
+                produtos = data.produtos;
+                console.log(`${produtos.length} produtos carregados`);
+
+                if (produtos.length === 0) {
+                    console.log('Nenhum produto encontrado');
+                    alert('Nenhum produto encontrado');
+                    return;
+                }
+
+                atualizarListaProdutos(produtos);
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar lista de produtos: ' + error.message);
+            }
+        }
+
+        function atualizarListaProdutos(produtosFiltrados) {
+            console.log('Atualizando lista de produtos...', produtosFiltrados);
+            productSelect.innerHTML = '<option value="">Selecione um produto</option>';
+            produtosFiltrados.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id_produto;
+                option.textContent = `${produto.nome_produto} - ${produto.nome_fornecedor}`;
+                productSelect.appendChild(option);
+            });
+        }
+
+        function filtrarProdutos() {
+            const termo = searchInput.value.toLowerCase();
+            const produtosFiltrados = produtos.filter(produto => 
+                produto.nome_produto.toLowerCase().includes(termo)
+            );
+            atualizarListaProdutos(produtosFiltrados);
+        }
+
+        function atualizarInformacoesProduto() {
+            const produtoSelecionado = produtos.find(p => p.id_produto == productSelect.value);
+            if (produtoSelecionado) {
+                console.log('Produto selecionado:', produtoSelecionado);
+                unitPriceSpan.textContent = parseFloat(produtoSelecionado.preco_produto).toFixed(2);
+                supplierSpan.textContent = produtoSelecionado.nome_fornecedor;
+                calcularTotal();
+            } else {
+                unitPriceSpan.textContent = '0.00';
+                supplierSpan.textContent = '-';
+                totalPriceSpan.textContent = '0.00';
+            }
+        }
+
+        function calcularTotal() {
+            const quantidade = parseInt(quantityInput.value) || 0;
+            const precoUnitario = parseFloat(unitPriceSpan.textContent) || 0;
+            totalPriceSpan.textContent = (quantidade * precoUnitario).toFixed(2);
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const produtoSelecionado = produtos.find(p => p.id_produto == productSelect.value);
+            const quantidade = parseInt(quantityInput.value) || 0;
+            
+            if (!productSelect.value) {
+                alert('Selecione um produto');
+                return;
+            }
+
+            if (!quantidade || quantidade < 1) {
+                alert('Quantidade deve ser maior que zero');
+                return;
+            }
+
+            try {
+                console.log('Enviando pedido:', {
+                    id_usuario_pedido: usuarioLogado.id_usuario,
+                    nome_usuario: usuarioLogado.nome_usuario,
+                    id_produto_pedido: parseInt(productSelect.value),
+                    quantidade_produto: quantidade,
+                    preco_produto: produtoSelecionado.preco_produto
+                });
+
+                const response = await fetch('http://localhost:3000/pedido', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id_usuario_pedido: usuarioLogado.id_usuario,
+                        nome_usuario: usuarioLogado.nome_usuario,
+                        id_produto_pedido: parseInt(productSelect.value),
+                        quantidade_produto: quantidade,
+                        preco_produto: produtoSelecionado.preco_produto
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Resposta do servidor:', data);
+
+                if (data.success) {
+                    alert('Pedido criado com sucesso!');
+                    window.location.href = 'pedido_consultar.html';
+                } else {
+                    throw new Error(data.message || 'Erro ao criar pedido');
+                }
+            } catch (error) {
+                console.error('Erro ao criar pedido:', error);
+                alert('Erro ao criar pedido: ' + error.message);
+            }
+        });
+
+        searchInput.addEventListener('input', filtrarProdutos);
+        productSelect.addEventListener('change', atualizarInformacoesProduto);
+        quantityInput.addEventListener('input', calcularTotal);
+
+        // Carregar produtos ao iniciar a página
+        carregarProdutos();
+    </script>
 </body>
 </html>

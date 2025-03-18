@@ -5,16 +5,245 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuário</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <style>
+        .input-group {
+            position: relative;
+        }
+        .password-requirements {
+            display: none;
+            position: absolute;
+            left: 105%; /* Posiciona à direita do campo de input */
+            top: 0;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 200px;
+            z-index: 100;
+        }
+        .password-requirements ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 5px 0;
+        }
+        .password-requirements p {
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        .password-requirements li {
+            margin: 3px 0;
+        }
+        .fa-check-circle {
+            color: #4CAF50;
+        }
+        .fa-times-circle {
+            color: #f44336;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>Registro de Usuário</h2>
-        <form>
-            <input type="text" placeholder="Nome de Usuário" required>
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Senha" required>
-            <button type="submit">Registrar</button>
+        <div class="login-header">
+            <i class="fas fa-user-plus"></i>
+            <h2>Registro de Usuário</h2>
+        </div>
+        <form id="registroForm">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="nome_usuario" placeholder="Nome de Usuário" required minlength="3">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email_usuario" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="senha_usuario" placeholder="Senha" required minlength="6">
+                <div class="password-requirements">
+                    <p>A senha deve conter:</p>
+                    <ul>
+                        <li><i class="fas fa-times-circle"></i> Mínimo 6 caracteres</li>
+                        <li><i class="fas fa-times-circle"></i> Uma letra maiúscula</li>
+                        <li><i class="fas fa-times-circle"></i> Uma letra minúscula</li>
+                        <li><i class="fas fa-times-circle"></i> Um número</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="confirma_senha" placeholder="Confirme a Senha" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-user-tag"></i>
+                <select id="id_nivel_usuario" required>
+                    <option value="">Selecione o nível de acesso</option>
+                </select>
+            </div>
+            <div class="botoes-container">
+                <button type="button" onclick="window.location.href='tela_inicial.html'">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <button type="submit">
+                    <i class="fas fa-user-plus"></i> Registrar
+                </button>
+            </div>
         </form>
     </div>
+
+    <script>
+        const senhaInput = document.getElementById('senha_usuario');
+        const confirmaSenhaInput = document.getElementById('confirma_senha');
+        const passwordRequirements = document.querySelector('.password-requirements');
+
+        // Mostrar requisitos da senha quando o campo recebe foco
+        senhaInput.addEventListener('focus', () => {
+            passwordRequirements.style.display = 'block';
+        });
+
+        // Esconder requisitos da senha quando o campo perde foco
+        senhaInput.addEventListener('blur', () => {
+            passwordRequirements.style.display = 'none';
+        });
+
+        // Validar senha em tempo real
+        senhaInput.addEventListener('input', validarSenha);
+
+        function validarSenha() {
+            const senha = senhaInput.value;
+            const requirements = passwordRequirements.querySelectorAll('li');
+            
+            // Validar comprimento mínimo
+            requirements[0].innerHTML = `<i class="fas fa-${senha.length >= 6 ? 'check' : 'times'}-circle"></i> Mínimo 6 caracteres`;
+            
+            // Validar letra maiúscula
+            requirements[1].innerHTML = `<i class="fas fa-${/[A-Z]/.test(senha) ? 'check' : 'times'}-circle"></i> Uma letra maiúscula`;
+            
+            // Validar letra minúscula
+            requirements[2].innerHTML = `<i class="fas fa-${/[a-z]/.test(senha) ? 'check' : 'times'}-circle"></i> Uma letra minúscula`;
+            
+            // Validar número
+            requirements[3].innerHTML = `<i class="fas fa-${/[0-9]/.test(senha) ? 'check' : 'times'}-circle"></i> Um número`;
+        }
+
+        // Adicionar validação em tempo real para espaços no nome de usuário
+        document.getElementById('nome_usuario').addEventListener('input', function(e) {
+            if (this.value.includes(' ')) {
+                this.setCustomValidity('O nome de usuário não pode conter espaços');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Carregar níveis de acesso
+        async function carregarNiveis() {
+            try {
+                console.log('Carregando níveis de acesso...');
+                const select = document.getElementById('id_nivel_usuario');
+                
+                // Definir os níveis de acesso diretamente
+                const niveis = [
+                    { id: 1, nome: 'Administrador' },
+                    { id: 2, nome: 'Usuário de Produtos' },
+                    { id: 3, nome: 'Usuário de Pedidos' }
+                ];
+
+                // Limpar opções existentes
+                select.innerHTML = '<option value="">Selecione o nível de acesso</option>';
+                
+                // Adicionar os níveis ao select
+                niveis.forEach(nivel => {
+                    const option = document.createElement('option');
+                    option.value = nivel.id;
+                    option.textContent = nivel.nome;
+                    select.appendChild(option);
+                });
+
+                console.log('Níveis de acesso carregados com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar níveis:', error);
+                alert('Erro ao carregar níveis de acesso');
+            }
+        }
+
+        // Carregar níveis ao iniciar a página
+        document.addEventListener('DOMContentLoaded', carregarNiveis);
+
+        document.getElementById('registroForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const nome_usuario = document.getElementById('nome_usuario').value;
+            const email_usuario = document.getElementById('email_usuario').value;
+            const senha = document.getElementById('senha_usuario').value;
+            const confirmaSenha = document.getElementById('confirma_senha').value;
+            const id_nivel_usuario = document.getElementById('id_nivel_usuario').value;
+
+            // Validar se um nível foi selecionado
+            if (!id_nivel_usuario) {
+                alert('Por favor, selecione um nível de acesso');
+                return;
+            }
+
+            // Validar nome de usuário
+            if (nome_usuario.length < 3) {
+                alert('O nome de usuário deve ter pelo menos 3 caracteres');
+                return;
+            }
+
+            // Validar espaços no nome de usuário
+            if (nome_usuario.includes(' ')) {
+                alert('O nome de usuário não pode conter espaços');
+                return;
+            }
+
+            // Validar formato do email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email_usuario)) {
+                alert('Por favor, insira um email válido');
+                return;
+            }
+
+            // Validar senha
+            if (senha.length < 6 || !/[A-Z]/.test(senha) || !/[a-z]/.test(senha) || !/[0-9]/.test(senha)) {
+                alert('A senha não atende aos requisitos mínimos de segurança');
+                return;
+            }
+
+            // Validar confirmação de senha
+            if (senha !== confirmaSenha) {
+                alert('As senhas não coincidem');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome_usuario,
+                        email_usuario,
+                        senha_usuario: senha,
+                        id_nivel_usuario: parseInt(id_nivel_usuario)
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Usuário registrado com sucesso!');
+                    window.location.href = 'usuario_consultar.html';
+                } else {
+                    alert(data.message || 'Erro ao registrar usuário.');
+                }
+            } catch (error) {
+                console.error('Erro ao registrar usuário:', error);
+                alert('Erro ao tentar registrar usuário.');
+            }
+        });
+    </script>
 </body>
 </html>

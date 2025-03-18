@@ -3,42 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edição de Pedido</title>
+    <title>Editar Pedido</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-edit"></i>
+                <h2>Edição de Pedido</h2>
+            </div>
+            <form id="form_pedido" class="form-container">
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="number" id="id_usuario" name="id_usuario" placeholder="ID do Usuário" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <input type="number" id="id_produto" name="id_produto" placeholder="ID do Produto" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-sort-amount-up"></i>
+                    </div>
+                    <input type="number" id="quantidade" name="quantidade" placeholder="Quantidade" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <input type="number" id="preco" name="preco" step="0.01" placeholder="Preço" required>
+                </div>
+                <div class="input-group">
+                    <div class="icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <input type="number" id="id_fornecedor" name="id_fornecedor" placeholder="ID do Fornecedor" required>
+                </div>
+                <div class="botoes-container">
+                    <button type="button" onclick="window.history.back()" class="btn-voltar">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                    <button type="submit" class="btn-salvar">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="util_funcoes.js"></script>
     <script>
-        // Função para buscar os detalhes do pedido e preencher o formulário
+        // Função para buscar detalhes do pedido
         function buscarDetalhesPedido() {
             const urlParams = new URLSearchParams(window.location.search);
             const idPedido = urlParams.get('id');
 
-            // Simulação de busca no banco de dados
-            if (idPedido === "1") {
-                document.getElementById('id_pedido').value = "1";
-                document.getElementById('usuario_pedido').value = "Usuário Exemplo";
-                document.getElementById('produto_pedido').value = "Produto Exemplo";
-                document.getElementById('quantidade_pedido').value = "10";
-                document.getElementById('preco_pedido').value = "1000";
-            } else {
-                alert("Pedido não encontrado");
+            if (!idPedido) {
+                alert('ID do pedido não especificado');
+                window.location.href = 'pedido_consultar.html';
+                return;
             }
+
+            fetch(`http://localhost:3000/pedido/${idPedido}`)
+                .then(response => response.json())
+                .then(pedido => {
+                    if (!pedido) {
+                        alert('Pedido não encontrado');
+                        window.location.href = 'pedido_consultar.html';
+                        return;
+                    }
+
+                    document.getElementById('id_usuario').value = pedido.id_usuario_pedido;
+                    document.getElementById('id_produto').value = pedido.id_produto_pedido;
+                    document.getElementById('quantidade').value = pedido.quantidade_produto;
+                    document.getElementById('preco').value = pedido.preco_produto_pedido;
+                    document.getElementById('id_fornecedor').value = pedido.id_fornecedor_pedido;
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar detalhes do pedido:', error);
+                    alert('Erro ao carregar detalhes do pedido. Verifique se o servidor está rodando.');
+                });
         }
 
-        // Carregar os detalhes do pedido ao carregar a página
+        // Configurar o formulário
+        document.getElementById('form_pedido').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const idPedido = urlParams.get('id');
+
+            const dadosPedido = {
+                id_usuario_pedido: document.getElementById('id_usuario').value,
+                id_produto_pedido: document.getElementById('id_produto').value,
+                quantidade_produto: document.getElementById('quantidade').value,
+                preco_produto_pedido: document.getElementById('preco').value,
+                id_fornecedor_pedido: document.getElementById('id_fornecedor').value
+            };
+
+            fetch(`http://localhost:3000/pedido/${idPedido}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosPedido)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert('Pedido atualizado com sucesso!');
+                window.location.href = 'pedido_consultar.html';
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar pedido:', error);
+                alert('Erro ao atualizar pedido. Verifique se o servidor está rodando.');
+            });
+        });
+
+        // Carregar detalhes do pedido ao carregar a página
         window.onload = buscarDetalhesPedido;
     </script>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Edição de Pedido</h2>
-        <form>
-            <input type="hidden" id="id_pedido">
-            <input type="text" id="usuario_pedido" placeholder="Usuário" required>
-            <input type="text" id="produto_pedido" placeholder="Produto" required>
-            <input type="number" id="quantidade_pedido" placeholder="Quantidade" required>
-            <input type="number" id="preco_pedido" placeholder="Preço" required>
-            <button type="submit">Atualizar</button>
-            <button type="button" onclick="window.history.back()">Cancelar</button>
-        </form>
-    </div>
 </body>
 </html>

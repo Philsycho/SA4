@@ -3,33 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta e Exibição de Pedidos</title>
+    <title>Consulta de Pedidos</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Consulta de Pedidos</h2>
+            </div>
+            <div class="botoes-container">
+                <button onclick="window.location.href='pedido_novo.html'" class="btn-novo">
+                    <i class="fas fa-plus"></i> Novo Pedido
+                </button>
+                <button onclick="window.location.href='tela_inicial.html'" class="btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço Total</th>
+                            <th>Fornecedor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista_pedidos">
+                        <!-- Lista de pedidos será exibida aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Verificar login
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuarioLogado || !usuarioLogado.logado) {
+            window.location.href = 'index.html';
+        }
+
+        // Função para formatar preço em Reais
+        function formatarPreco(preco) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(preco);
+        }
+
         // Função para exibir lista de pedidos
-        function exibirPedidos() {
-            const pedidos = [
-                { id: 1, usuario: "Usuário Exemplo", produto: "Produto Exemplo", quantidade: 10, preco: 1000 }
-                // Adicione outros pedidos aqui
-            ];
+        async function exibirPedidos() {
+            try {
+                console.log('Iniciando busca de pedidos...');
+                const response = await fetch('http://localhost:3000/pedido');
+                
+                console.log('Status da resposta:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
 
-            const listaPedidos = document.getElementById('lista_pedidos');
-            listaPedidos.innerHTML = ''; // Limpa a lista
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
 
-            pedidos.forEach(pedido => {
-                const pedidoItem = document.createElement('div');
-                pedidoItem.className = 'pedido-item';
-                pedidoItem.innerHTML = `
-                    <p>ID: ${pedido.id}</p>
-                    <p>Usuário: ${pedido.usuario}</p>
-                    <p>Produto: ${pedido.produto}</p>
-                    <p>Quantidade: ${pedido.quantidade}</p>
-                    <p>Preço: ${pedido.preco}</p>
-                    <button onclick="visualizarPedido(${pedido.id})">Visualizar</button>
-                    <button onclick="editarPedido(${pedido.id})">Editar</button>
+                const listaPedidos = document.getElementById('lista_pedidos');
+                listaPedidos.innerHTML = ''; // Limpa a lista
+
+                if (!data.pedidos || data.pedidos.length === 0) {
+                    listaPedidos.innerHTML = '<tr><td colspan="7" class="no-data">Nenhum pedido encontrado</td></tr>';
+                    return;
+                }
+
+                data.pedidos.forEach(pedido => {
+                    const tr = document.createElement('tr');
+                    const precoTotal = pedido.preco_produto_pedido * pedido.quantidade_produto;
+                    
+                    tr.innerHTML = `
+                        <td>${pedido.id_pedido}</td>
+                        <td>${pedido.nome_usuario}</td>
+                        <td>${pedido.nome_produto || pedido.id_produto_pedido}</td>
+                        <td>${pedido.quantidade_produto}</td>
+                        <td>${formatarPreco(precoTotal)}</td>
+                        <td>${pedido.nome_fornecedor || pedido.id_fornecedor_pedido}</td>
+                        <td>
+                            <button onclick="visualizarPedido(${pedido.id_pedido})" class="btn-action">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editarPedido(${pedido.id_pedido})" class="btn-action">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    `;
+                    listaPedidos.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar pedidos:', error);
+                const listaPedidos = document.getElementById('lista_pedidos');
+                listaPedidos.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Erro ao carregar pedidos: ${error.message}
+                            <button onclick="exibirPedidos()" class="btn-retry">
+                                <i class="fas fa-sync"></i> Tentar Novamente
+                            </button>
+                        </td>
+                    </tr>
                 `;
-                listaPedidos.appendChild(pedidoItem);
-            });
+            }
         }
 
         // Função para redirecionar para a página de visualização
@@ -42,16 +129,8 @@
             window.location.href = `pedido_editar.html?id=${id}`;
         }
 
-        // Função para redirecionar para a página de novo pedido
-        function novoPedido() {
-            window.location.href = `pedido_novo.html`;
-        }
-
         // Carregar pedidos ao carregar a página
         window.onload = exibirPedidos;
     </script>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Consulta e Exibição de Pedidos</h2>
-        <button onclick="novoPedido()">Novo
+</body>
+</html>

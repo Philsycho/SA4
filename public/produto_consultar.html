@@ -3,54 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta e Exibição de Produtos</title>
+    <title>Consulta de Produtos</title>
     <link rel="stylesheet" href="style.css">
-    <script>
-        // Função para exibir lista de produtos
-        function exibirProdutos() {
-            const produtos = [
-                { id: 1, nome: "Produto Exemplo", preco: 100, fornecedor: 1 }
-                // Adicione outros produtos aqui
-            ];
-
-            const listaProdutos = document.getElementById('lista_produtos');
-            listaProdutos.innerHTML = ''; // Limpa a lista
-
-            produtos.forEach(produto => {
-                const produtoItem = document.createElement('div');
-                produtoItem.className = 'produto-item';
-                produtoItem.innerHTML = `
-                    <p>ID: ${produto.id}</p>
-                    <p>Nome: ${produto.nome}</p>
-                    <p>Preço: ${produto.preco}</p>
-                    <p>Fornecedor: ${produto.fornecedor}</p>
-                    <button onclick="visualizarProduto(${produto.id})">Visualizar</button>
-                    <button onclick="editarProduto(${produto.id})">Editar</button>
-                `;
-                listaProdutos.appendChild(produtoItem);
-            });
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
-        // Função para redirecionar para a página de visualização
+        .search-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .pagination button:hover {
+            background: #f0f0f0;
+        }
+
+        .pagination button.active {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .pagination button:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        .page-info {
+            margin: 0 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="header">
+                <i class="fas fa-search"></i>
+                <h2>Consulta de Produtos</h2>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar produto por nome...">
+                <button onclick="buscarProdutos()" class="primary-button">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+
+            <div id="lista_produtos" class="lista-produtos">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Fornecedor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="produtos-tbody">
+                        <!-- Lista de produtos será exibida aqui -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button onclick="mudarPagina('primeira')" id="btn-primeira">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button onclick="mudarPagina('anterior')" id="btn-anterior">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <span class="page-info">
+                    Página <span id="pagina-atual">1</span> de <span id="total-paginas">1</span>
+                </span>
+                <button onclick="mudarPagina('proxima')" id="btn-proxima">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button onclick="mudarPagina('ultima')" id="btn-ultima">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+
+            <div class="button-container">
+                <button onclick="window.location.href='tela_inicial.html'" class="secondary-button">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let todosProdutos = [];
+        let paginaAtual = 1;
+        const itensPorPagina = 10;
+        let termoBusca = '';
+
+        // Verificar login
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario'));
+        if (!usuarioLogado || !usuarioLogado.logado) {
+            window.location.href = 'index.html';
+        }
+
+        // Função para formatar preço em Reais
+        function formatarPreco(preco) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(preco);
+        }
+
+        // Função para carregar produtos
+        async function carregarProdutos() {
+            try {
+                console.log('Iniciando busca de produtos...');
+                const response = await fetch('http://localhost:3000/produto');
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos:', data);
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Erro ao carregar produtos');
+                }
+
+                todosProdutos = data.produtos;
+                atualizarExibicao();
+            } catch (error) {
+                console.error('Erro ao buscar produtos:', error);
+                alert('Erro ao carregar produtos: ' + error.message);
+            }
+        }
+
+        // Função para filtrar produtos
+        function buscarProdutos() {
+            termoBusca = document.getElementById('searchInput').value.toLowerCase();
+            paginaAtual = 1; // Volta para a primeira página ao pesquisar
+            atualizarExibicao();
+        }
+
+        // Função para mudar de página
+        function mudarPagina(acao) {
+            const totalPaginas = Math.ceil(getProdutosFiltrados().length / itensPorPagina);
+
+            switch(acao) {
+                case 'primeira':
+                    paginaAtual = 1;
+                    break;
+                case 'anterior':
+                    if (paginaAtual > 1) paginaAtual--;
+                    break;
+                case 'proxima':
+                    if (paginaAtual < totalPaginas) paginaAtual++;
+                    break;
+                case 'ultima':
+                    paginaAtual = totalPaginas;
+                    break;
+            }
+
+            atualizarExibicao();
+        }
+
+        // Função para obter produtos filtrados
+        function getProdutosFiltrados() {
+            return todosProdutos.filter(produto => 
+                produto.nome_produto.toLowerCase().includes(termoBusca)
+            );
+        }
+
+        // Função para atualizar a exibição dos produtos
+        function atualizarExibicao() {
+            const produtosFiltrados = getProdutosFiltrados();
+            const totalPaginas = Math.ceil(produtosFiltrados.length / itensPorPagina);
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = inicio + itensPorPagina;
+            const produtosPagina = produtosFiltrados.slice(inicio, fim);
+
+            const tbody = document.getElementById('produtos-tbody');
+            tbody.innerHTML = '';
+
+            if (produtosPagina.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="no-data">
+                            Nenhum produto encontrado${termoBusca ? ' para a busca realizada' : ''}
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            produtosPagina.forEach(produto => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${produto.id_produto}</td>
+                    <td>${produto.nome_produto}</td>
+                    <td>${formatarPreco(produto.preco_produto)}</td>
+                    <td>${produto.nome_fornecedor}</td>
+                    <td>
+                        <button onclick="visualizarProduto(${produto.id_produto})" class="btn-action">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="editarProduto(${produto.id_produto})" class="btn-action">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Atualizar informações da paginação
+            document.getElementById('pagina-atual').textContent = paginaAtual;
+            document.getElementById('total-paginas').textContent = totalPaginas;
+
+            // Atualizar estado dos botões de navegação
+            document.getElementById('btn-primeira').disabled = paginaAtual === 1;
+            document.getElementById('btn-anterior').disabled = paginaAtual === 1;
+            document.getElementById('btn-proxima').disabled = paginaAtual === totalPaginas;
+            document.getElementById('btn-ultima').disabled = paginaAtual === totalPaginas;
+        }
+
+        // Funções de navegação
         function visualizarProduto(id) {
             window.location.href = `produto_visualizar.html?id=${id}`;
         }
 
-        // Função para redirecionar para a página de edição
         function editarProduto(id) {
             window.location.href = `produto_editar.html?id=${id}`;
         }
 
-        // Carregar produtos ao carregar a página
-        window.onload = exibirProdutos;
+        // Adicionar evento de busca ao pressionar Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarProdutos();
+            }
+        });
+
+        // Carregar produtos ao iniciar
+        carregarProdutos();
     </script>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Consulta e Exibição de Produtos</h2>
-        <div id="lista_produtos" class="lista-produtos">
-            <!-- Lista de produtos será exibida aqui -->
-        </div>
-    </div>
 </body>
 </html>
